@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ManoTake - PC Building Guide</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Anime.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+        
+        :root {
+            --bg-color: #0a0a0f;
+            --primary-blue: #00d4ff;
+            --secondary-blue: #0066ff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #ffffff;
+        }
+
+        /* 1. Background elements */
+        #stars-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        .hud-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 2;
+            transform: perspective(600px) rotateX(15deg) scale(1.5);
+            transform-origin: center -20%;
+            pointer-events: none;
+        }
+
+        /* Ambient subtle pulse behind everything */
+        .ambient-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50vmin; height: 50vmin;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(0, 102, 255, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 3;
+            animation: breathe 8s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes breathe {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* 2. Main containers */
+        #intro-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #main-interface {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            background: var(--bg-color);
+        }
+
+        /* 3. Animation Elements */
+        .ray {
+            position: absolute;
+            background: var(--primary-blue);
+            box-shadow: 0 0 10px var(--primary-blue), 0 0 20px var(--secondary-blue);
+            border-radius: 50%;
+            transform-origin: center;
+            opacity: 0; /* Handled by anime.js */
+        }
+
+        #circle-container {
+            position: relative;
+            width: 250px; height: 250px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #master-logo {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .circle-pulse {
+            animation: svg-pulse 3s infinite alternate ease-in-out;
+        }
+
+        @keyframes svg-pulse {
+            0% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3)); }
+            100% { filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.8)); }
+        }
+
+        #badge-bg, #badge-m, #badge-check {
+            opacity: 0;
+            transform-origin: 100px 100px;
+        }
+
+        #brand-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 56px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: center;
+            height: 65px;
+            margin-bottom: 5px;
+        }
+
+        .brand-char {
+            opacity: 0;
+            color: #ffffff;
+            display: inline-block;
+        }
+
+        .brand-char:nth-child(-n+4) {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .brand-char:nth-child(n+5) {
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.9), 0 0 40px rgba(0, 102, 255, 0.7);
+        }
+
+        #tagline {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--primary-blue);
+            letter-spacing: 3px;
+            opacity: 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        #start-btn {
+            padding: 12px 45px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary-blue);
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--primary-blue);
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            opacity: 0;
+            pointer-events: none; /* Initially unclickable */
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2), inset 0 0 10px rgba(0, 212, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        #start-btn:hover {
+            color: var(--bg-color);
+            background: var(--primary-blue);
+            box-shadow: 0 0 25px var(--primary-blue), 0 0 5px #fff;
+            text-shadow: none;
+        }
+
+        .btn-pulse {
+            animation: btn-idle 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes btn-idle {
+            0% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.2), inset 0 0 10px rgba(0, 212, 255, 0.1); }
+            100% { box-shadow: 0 0 25px rgba(0, 212, 255, 0.6), inset 0 0 15px rgba(0, 212, 255, 0.3); }
+        }
+
+        /* --- MAIN INTERFACE CSS --- */
+        #main-interface {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            background: transparent;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #top-nav {
+            height: 60px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.1);
+        }
+
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-icon {
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-icon:hover {
+            color: var(--primary-blue);
+            filter: drop-shadow(0 0 8px var(--primary-blue));
+        }
+
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 30px 40px 30px;
+            overflow: hidden;
+        }
+
+        .content-header {
+            text-align: center;
+            margin-bottom: 30px;
+            flex-shrink: 0;
+        }
+
+        .welcome-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
+            width: 50%;
+            margin: 0 auto;
+            opacity: 0.8;
+            box-shadow: 0 0 10px var(--primary-blue);
+        }
+
+        .cards-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .feature-card {
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.1), inset 0 0 10px rgba(0, 212, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 45%;
+            min-width: 320px;
+            opacity: 0;
+        }
+
+        .feature-card:hover {
+            transform: scale(1.03);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.3), inset 0 0 15px rgba(0, 212, 255, 0.1);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .card-right { align-self: flex-end; }
+        .card-left { align-self: flex-start; }
+
+        .card-icon {
+            color: var(--primary-blue);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
+        }
+
+        .card-text { flex-grow: 1; }
+        .card-text h2 {
+            font-size: 18px;
+            margin: 0 0 8px 0;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .card-text p {
+            font-size: 13px;
+            margin: 0;
+            color: #b0c4de;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .arrow {
+            color: var(--primary-blue);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 5px rgba(0, 212, 255, 0.8));
+        }
+
+        .arrow-right { animation: pulse-right 2s infinite ease-in-out; }
+        .arrow-left { animation: pulse-left 2s infinite ease-in-out; }
+
+        @keyframes pulse-right {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        @keyframes pulse-left {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-5px); }
+        }
+
+        /* Subpage */
+        #subpage-container {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            z-index: 20;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+        .back-btn {
+            position: absolute;
+            top: 25px; left: 25px;
+            padding: 8px 15px;
+            background: rgba(10, 10, 15, 0.8);
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .back-btn:hover {
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            color: #fff;
+        }
+        #subpage-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* Mobile Adjustments to guarantee no-scroll */
+        @media (max-height: 800px), (max-width: 768px) {
+            #top-nav { height: 50px; padding: 0 15px; }
+            .nav-brand { font-size: 20px; }
+            .nav-icons { gap: 15px; }
+            .nav-icon { width: 20px; height: 20px; }
+            
+            #main-content { padding: 10px 15px 15px 15px; }
+            .content-header { margin-bottom: 15px; }
+            .welcome-text { font-size: 16px; margin-bottom: 8px; }
+            .divider { width: 40%; }
+            
+            .cards-container { gap: 10px; justify-content: space-around; max-width: 100%; }
+            .feature-card {
+                width: 100%;
+                min-width: 0;
+                align-self: center !important;
+                padding: 12px 15px;
+                gap: 15px;
+                border-radius: 8px;
+            }
+            .card-icon svg, .arrow svg { width: 24px; height: 24px; }
+            
+            .card-text h2 { font-size: 15px; margin-bottom: 4px; }
+            .card-text p { font-size: 11px; line-height: 1.3; }
+        }
+
+        /* --- NEW PART INFO CSS --- */
+        #part-info-view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: transparent; z-index: 10; display: none;
+            flex-direction: column; opacity: 1;
+        }
+        .pi-nav {
+            height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.1); width: 100%; box-sizing: border-box;
+        }
+        .pi-header { text-align: center; margin-top: 25px; flex-shrink: 0; }
+        .pi-title { font-family: 'Orbitron', sans-serif; font-size: 30px; color: #fff; text-shadow: 0 0 15px rgba(0,212,255,0.6); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .pi-divider { width: 150px; height: 2px; background: #00d4ff; box-shadow: 0 0 8px #00d4ff; margin: 0 auto 25px auto; }
+        .pi-content-area {
+            flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 20px; overflow: hidden; justify-content: flex-start; box-sizing: border-box;
+        }
+        .comp-grid {
+            display: grid; grid-template-columns: repeat(3, 140px); gap: 15px; margin-bottom: 25px; justify-content: center;
+        }
+        .comp-item {
+            background: #1a1a2e; border: 1px solid #00d4ff; border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100px; cursor: pointer; transition: all 0.3s;
+            box-shadow: inset 0 0 10px rgba(0,212,255,0.05); user-select: none;
+        }
+        .comp-item:hover, .comp-item.active {
+            background: rgba(0, 212, 255, 0.1); border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0,212,255,0.3), inset 0 0 15px rgba(0,212,255,0.2);
+            transform: scale(1.05);
+        }
+        .comp-icon { font-size: 36px; margin-bottom: 5px; color: transparent; text-shadow: 0 0 0 #fff; filter: drop-shadow(0 0 5px #00d4ff); }
+        .comp-label { font-size: 13px; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        
+        #pi-bottom-section {
+            width: 100%; max-width: 450px; text-align: center; opacity: 0; display: none;
+            flex-direction: column; align-items: center; background: rgba(26, 26, 46, 0.7);
+            border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 12px; padding: 20px;
+            box-shadow: inset 0 0 15px rgba(0,212,255,0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        .pi-definition { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; color: #e0e0e0; margin-bottom: 15px; line-height: 1.4; }
+        .pi-search {
+            width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.6); border: 1px solid #00d4ff;
+            border-radius: 6px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 15px;
+            box-sizing: border-box; outline: none; transition: 0.3s; text-align: center;
+        }
+        .pi-search::placeholder { color: rgba(255,255,255,0.4); }
+        .pi-search:focus { box-shadow: 0 0 15px rgba(0,212,255,0.3), inset 0 0 10px rgba(0,212,255,0.2); border-color: #fff; }
+        
+        .pi-build-btn {
+            padding: 12px 35px; background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #fff;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; border-radius: 6px;
+            cursor: pointer; transition: all 0.3s; width: 100%; max-width: 200px;
+        }
+        .pi-build-btn:hover { background: #00d4ff; color: #0a0a0f; box-shadow: 0 0 20px #00d4ff; }
+        
+        /* --- TECH CARD CSS --- */
+        #tech-card-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.85);
+            z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        #tech-card-scaler { transform-origin: center center; }
+        #tech-card {
+            width: 1080px; height: 1350px; background: #0a0a0f; border: 2px solid #00d4ff;
+            box-shadow: 0 0 50px rgba(0,212,255,0.2), inset 0 0 30px rgba(0,212,255,0.1);
+            padding: 60px; box-sizing: border-box; position: relative; display: flex; flex-direction: column;
+        }
+        #close-tech-card {
+            position: absolute; top: 35px; right: 45px; border: none; background: transparent;
+            color: #00d4ff; font-size: 55px; font-weight: 300; cursor: pointer; transition: 0.3s;
+            text-shadow: 0 0 15px #00d4ff; line-height: 1; padding: 0; margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        #close-tech-card:hover { transform: scale(1.15); color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8); }
+        
+        .tc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .tc-logo { font-family: 'Orbitron', sans-serif; font-size: 35px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+        .tc-label { font-size: 20px; color: #fff; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; }
+        .tc-divider { width: 100%; height: 2px; background: #00d4ff; margin-bottom: 60px; box-shadow: 0 0 10px #00d4ff; opacity: 0.7; }
+        
+        .tc-image-box {
+            width: 300px; height: 200px; background: #1a1a2e; border: 1px solid #00d4ff;
+            margin: 0 auto 50px auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,212,255,0.1); border-radius: 4px;
+        }
+        .tc-camera { font-size: 50px; opacity: 0.5; margin-bottom: 12px; color: transparent; text-shadow: 0 0 0 #00d4ff; }
+        .tc-image-text { font-size: 16px; color: #00d4ff; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+        
+        #tc-comp-name {
+            font-family: 'Orbitron', sans-serif; font-size: 55px; font-weight: 700; color: #fff;
+            text-align: center; text-shadow: 0 0 25px rgba(0,212,255,0.7); margin-bottom: 70px;
+            letter-spacing: 2px;
+        }
+        
+        #tc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+        .tc-item {
+            background: #1a1a2e; border: 1px solid #00d4ff; border-radius: 8px; height: 180px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 15px rgba(0,212,255,0.1);
+        }
+        .tc-item-icon { font-size: 40px; margin-bottom: 15px; color: transparent; text-shadow: 0 0 0 #b0c4de; }
+        .tc-item-label { font-size: 16px; color: #b0c4de; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .tc-item-val { font-family: 'Orbitron', sans-serif; font-size: 32px; color: #fff; text-shadow: 0 0 15px rgba(0,212,255,0.6); }
+        
+        .tc-footer { display: flex; justify-content: space-between; margin-top: auto; padding-top: 50px; }
+        .tc-foot-box {
+            background: #1a1a2e; border: 1px solid #00d4ff; border-radius: 8px; padding: 25px 50px;
+            display: flex; flex-direction: column; justify-content: center; gap: 8px; align-items: flex-start;
+            box-shadow: inset 0 0 15px rgba(0,212,255,0.1); width: 45%; box-sizing: border-box;
+        }
+        .tc-foot-box-right { align-items: flex-end; }
+        .tc-foot-label { font-size: 18px; color: #fff; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px; }
+        .tc-foot-val { font-family: 'Orbitron', sans-serif; font-size: 38px; color: #00d4ff; text-shadow: 0 0 15px rgba(0,212,255,0.5); font-weight: 700; }
+        
+        @media (max-width: 600px) {
+            .comp-grid { grid-template-columns: repeat(3, 100px); gap: 10px; margin-bottom: 15px; }
+            .comp-item { height: 85px; }
+            .comp-icon { font-size: 28px; }
+            .comp-label { font-size: 11px; }
+            .pi-title { font-size: 24px; margin-bottom: 8px; }
+            .pi-search { padding: 10px; }
+            .pi-definition { font-size: 13px; margin-bottom: 10px; }
+            #pi-bottom-section { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars-canvas"></canvas>
+    <div class="hud-grid"></div>
+    <div class="ambient-glow"></div>
+
+    <div id="intro-container">
+        <div id="circle-container">
+            <svg id="master-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00ffff"/>
+                        <stop offset="100%" stop-color="#0066ff"/>
+                    </linearGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <filter id="mShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity="0.9"/>
+                        <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#00d4ff" flood-opacity="0.5"/>
+                    </filter>
+                    <filter id="checkGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.9"/>
+                        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#00d4ff" flood-opacity="0.8"/>
+                    </filter>
+                </defs>
+
+                <g id="badge-bg">
+                    <!-- Outer tech ring -->
+                    <circle cx="100" cy="100" r="92" fill="#030b14" stroke="url(#cyanGrad)" stroke-width="3" filter="url(#glow)"/>
+                    <circle cx="100" cy="100" r="86" fill="none" stroke="#0044aa" stroke-width="1" opacity="0.5"/>
+
+                    <!-- Inner Hexagon -->
+                    <polygon points="100,18 175,58 175,142 100,182 25,142 25,58" fill="none" stroke="url(#cyanGrad)" stroke-width="4" filter="url(#glow)"/>
+                    <polygon points="100,28 165,63 165,137 100,172 35,137 35,63" fill="none" stroke="#0055cc" stroke-width="1.5"/>
+                </g>
+
+                <g id="badge-m">
+                    <!-- Chip pins -->
+                    <g stroke="#ffffff" stroke-width="4" stroke-linecap="square" opacity="0.6">
+                        <path d="M 25 70 L 40 70 M 25 90 L 40 90 M 25 110 L 40 110 M 25 130 L 40 130"/>
+                        <path d="M 175 70 L 160 70 M 175 90 L 160 90 M 175 110 L 160 110 M 175 130 L 160 130"/>
+                    </g>
+
+                    <!-- Solid tech M shape -->
+                    <g filter="url(#mShadow)">
+                        <!-- M base outline -->
+                        <path d="M 45 55 H 70 V 75 L 100 105 L 130 75 V 55 H 155 V 135 H 130 V 95 L 100 125 L 70 95 V 135 H 45 Z" fill="#ffffff" />
+                        
+                        <!-- Tech circuits inside the M -->
+                        <g stroke="#030b14" stroke-width="2.5" fill="none" opacity="0.9">
+                            <!-- Left circuit -->
+                            <path d="M 57 65 V 110 L 65 118"/>
+                            <circle cx="65" cy="118" r="3" fill="#00ffff"/>
+                            <rect x="54" y="60" width="6" height="6" fill="#00ffff"/>
+
+                            <!-- Right circuit -->
+                            <path d="M 143 125 V 80 L 135 72"/>
+                            <circle cx="135" cy="72" r="3" fill="#00ffff"/>
+                            
+                            <!-- Center circuits on V -->
+                            <path d="M 80 85 L 100 105 L 120 85"/>
+                        </g>
+                    </g>
+                </g>
+
+                <g id="badge-check" filter="url(#checkGlow)">
+                    <!-- Dark checkmark body with cyan stroke to pop out -->
+                    <path d="M 70 135 L 110 175 L 190 95 L 175 80 L 110 145 L 85 120 Z" fill="#02070f" stroke="#00d4ff" stroke-width="2.5"/>
+                    <!-- Inner bright core of the checkmark -->
+                    <path d="M 76 133 L 110 167 L 183 95 L 175 87 L 110 152 L 84 125 Z" fill="#00ffff"/>
+                </g>
+            </svg>
+        </div>
+
+        <div id="brand-name"></div>
+        <div id="tagline">Your Professional PC Building Assistant</div>
+        <button id="start-btn">START</button>
+    </div>
+
+    <div id="main-interface">
+        <nav id="top-nav">
+            <div class="nav-brand">Mano<span style="color:var(--primary-blue)">Take</span></div>
+            <div class="nav-icons">
+                <!-- Theme toggle icon (sun) -->
+                <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Account icon (person) -->
+                <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+        </nav>
+        <div id="main-content">
+            <div class="content-header">
+                <h1 class="welcome-text">Your Professional PC Companion</h1>
+                <div class="divider"></div>
+            </div>
+            
+            <div class="cards-container">
+                <!-- Card 1 -->
+                <div class="feature-card card-right">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect>
+                            <line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line>
+                            <line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line>
+                            <line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line>
+                        </svg>
+                    </div>
+                    <div class="card-text">
+                        <h2>Part Information</h2>
+                        <p>Get detailed specs, benchmarks and current market pricing for any PC component</p>
+                    </div>
+                    <div class="arrow arrow-right">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="feature-card card-left">
+                    <div class="arrow arrow-left">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </div>
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                    </div>
+                    <div class="card-text">
+                        <h2>Best Combo</h2>
+                        <p>Find the perfect CPU and GPU pairing for your budget or existing components</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="feature-card card-right">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line><line x1="3" y1="20" x2="21" y2="20"></line>
+                        </svg>
+                    </div>
+                    <div class="card-text">
+                        <h2>Build Evaluator</h2>
+                        <p>Analyze your full PC build for performance, compatibility and optimization tips</p>
+                    </div>
+                    <div class="arrow arrow-right">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty Subpage Container -->
+    <div id="subpage-container">
+        <button class="back-btn" id="back-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            BACK
+        </button>
+        <h1 id="subpage-title">Page Title</h1>
+        
+        <!-- NEW PART INFO VIEW -->
+        <div id="part-info-view">
+            <nav id="pi-top-nav" class="pi-nav">
+                <div class="nav-brand">Mano<span style="color:var(--primary-blue)">Take</span></div>
+                <div class="nav-icons">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+            </nav>
+            <div class="pi-header">
+                <div class="pi-title">Part Information</div>
+                <div class="pi-divider"></div>
+            </div>
+            <div class="pi-content-area">
+                <div class="comp-grid">
+                    <div class="comp-item" data-type="CPU"><div class="comp-icon">💻</div><div class="comp-label">CPU</div></div>
+                    <div class="comp-item" data-type="GPU"><div class="comp-icon">🖥️</div><div class="comp-label">GPU</div></div>
+                    <div class="comp-item" data-type="RAM"><div class="comp-icon">🕹️</div><div class="comp-label">RAM</div></div>
+                    <div class="comp-item" data-type="Motherboard"><div class="comp-icon">🖲️</div><div class="comp-label">Motherboard</div></div>
+                    <div class="comp-item" data-type="Storage"><div class="comp-icon">💽</div><div class="comp-label">Storage</div></div>
+                    <div class="comp-item" data-type="PSU"><div class="comp-icon">🔌</div><div class="comp-label">PSU</div></div>
+                </div>
+                <div id="pi-bottom-section">
+                    <div id="pi-definition" class="pi-definition">Select a component...</div>
+                    <input type="text" id="pi-search" class="pi-search" placeholder="Search for a model... e.g. RTX 4090">
+                    <button id="pi-build-btn" class="pi-build-btn">Build Card</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Background Star Canvas ---
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const stars = Array.from({ length: 200 }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 1.5 + 0.5,
+            vx: (Math.random() - 0.5) * 0.2, // Slow drift
+            vy: (Math.random() - 0.5) * 0.2,
+            baseAlpha: Math.random() * 0.5 + 0.1,
+            pulseSpeed: Math.random() * 0.02,
+            pulsePhase: Math.random() * Math.PI * 2
+        }));
+
+        let timeOffset = 0;
+        function renderStars() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Render very slow, organic space drift
+            stars.forEach(star => {
+                star.x += star.vx;
+                star.y += star.vy;
+                
+                // Wrap around edges
+                if (star.x < 0) star.x = width;
+                else if (star.x > width) star.x = 0;
+                if (star.y < 0) star.y = height;
+                else if (star.y > height) star.y = 0;
+
+                // Subtle twinkling
+                const alpha = star.baseAlpha + Math.sin(timeOffset * star.pulseSpeed + star.pulsePhase) * 0.2;
+                
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0, 212, 255, ${Math.max(0, alpha)})`;
+                ctx.fill();
+            });
+            timeOffset++;
+            requestAnimationFrame(renderStars);
+        }
+        renderStars();
+
+
+        // --- 2. Anime.js Sequence ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const introContainer = document.getElementById('intro-container');
+            const brandName = document.getElementById('brand-name');
+            const tagline = document.getElementById('tagline');
+            const startBtn = document.getElementById('start-btn');
+
+            // Setup Brand Name Characters for Typewriter 
+            const brandText = "ManoTake";
+            const chars = brandText.split('');
+            chars.forEach((char, index) => {
+                const span = document.createElement('span');
+                span.className = 'brand-char';
+                span.dataset.color = index >= 4 ? '#00d4ff' : '#ffffff';
+                span.textContent = char;
+                brandName.appendChild(span);
+            });
+
+            // Pre-calculate rays
+            const numRays = 12;
+            const rays = [];
+            const distance = Math.max(window.innerWidth, window.innerHeight) * 0.8; // Far enough off-screen
+
+            // We append to introContainer so left:50% top:50% works nicely.
+            // But we must place them exactly in the center vertically/horizontally
+            // and use anime.js to offset them and draw them in.
+            for (let i = 0; i < numRays; i++) {
+                const rayEl = document.createElement('div');
+                rayEl.className = 'ray';
+                
+                // Start angles evenly distributed
+                const angleRad = (i / numRays) * (Math.PI * 2);
+                const startX = Math.cos(angleRad) * distance;
+                const startY = Math.sin(angleRad) * distance;
+                const angleDeg = angleRad * (180 / Math.PI);
+
+                // Initial size for ray line
+                rayEl.style.width = '100px'; 
+                rayEl.style.height = '3px';
+                
+                // Center origin
+                rayEl.style.left = '50%';
+                rayEl.style.top = '50%';
+                // The element's own center is registered exactly on screen center
+                rayEl.style.marginLeft = '-50px'; // half width
+                rayEl.style.marginTop = '-1.5px'; // half height
+
+                introContainer.appendChild(rayEl);
+
+                rays.push({
+                    el: rayEl,
+                    startX: startX,
+                    startY: startY,
+                    angle: angleDeg
+                });
+            }
+
+            // Timeline definition
+            const tl = anime.timeline({
+                easing: 'easeOutExpo'
+            });
+
+            // STEP 1: Light Rays
+            // Position rays far away first
+            rays.forEach(ray => {
+                anime.set(ray.el, {
+                    translateX: ray.startX,
+                    translateY: ray.startY,
+                    rotate: ray.angle
+                });
+            });
+
+            // Animate them blazing towards center
+            tl.add({
+                targets: rays.map(r => r.el),
+                translateX: 0,
+                translateY: 0,
+                scaleX: [
+                    {value: 2, duration: 200, easing: 'easeOutQuad'}, // Stretch (motion blur)
+                    {value: 0.2, duration: 1300, easing: 'easeInQuad'} // Shrink as hitting center
+                ],
+                opacity: [
+                    {value: 0, duration: 0},
+                    {value: 1, duration: 300},
+                    {value: 1, duration: 1100},
+                    {value: 0, duration: 100} // disappear into the center
+                ],
+                duration: 1500,
+                easing: 'easeInCubic',
+                delay: anime.stagger(80, {start: 500}) // Staggered arrival feeling organic
+            })
+
+            // STEP 2: Badge Background Formation
+            .add({
+                targets: '#badge-bg',
+                scale: [0, 1],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutBack',
+                begin: () => {
+                    // Cleanup rays once they crash in
+                    setTimeout(() => {
+                        rays.forEach(r => r.el.remove());
+                    }, 200);
+                },
+                complete: () => {
+                    document.getElementById('master-logo').classList.add('circle-pulse');
+                }
+            }, '-=200') // Overlaps slightly with the final ray hits
+
+            // STEP 3: Logo 'M' Appearance
+            .add({
+                targets: '#badge-m',
+                scale: [0.3, 1],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutElastic(1, .8)'
+            }, '-=400')
+            
+            // STEP 3.5: Checkmark Appearance
+            .add({
+                targets: '#badge-check',
+                scale: [1.5, 1],
+                opacity: [0, 1],
+                duration: 600,
+                easing: 'easeOutBack'
+            }, '-=600')
+
+            // STEP 4: Brand Name (Typewriter)
+            .add({
+                targets: '.brand-char',
+                opacity: [0, 1],
+                translateY: [-10, 0], // Slight drop-in effect
+                scale: [1.2, 1],
+                color: (el) => ['#00d4ff', el.dataset.color],
+                duration: 400,
+                easing: 'easeOutQuad',
+                delay: anime.stagger(100) // letter by letter typing effect
+            }, '-=100')
+
+            // STEP 5: Tagline
+            .add({
+                targets: '#tagline',
+                opacity: [0, 1],
+                translateY: [15, 0],
+                duration: 800,
+                easing: 'easeOutQuad'
+            }, '+=300') // small pause after brand name
+
+            // STEP 6: Start Button
+            .add({
+                targets: '#start-btn',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                easing: 'easeOutQuad',
+                complete: () => {
+                    startBtn.classList.add('btn-pulse');
+                    startBtn.style.pointerEvents = 'auto'; // Make interactive
+                }
+            }, '+=200'); // final pause before button
+            
+            // START CLICK HANDLER
+            startBtn.addEventListener('click', () => {
+                // Remove pulse so it doesn't conflict
+                startBtn.classList.remove('btn-pulse');
+                
+                anime({
+                    targets: '#intro-container',
+                    opacity: 0,
+                    scale: 1.1, // cinematic zoom-in out
+                    duration: 600,
+                    easing: 'easeInOutQuad',
+                    complete: () => {
+                        introContainer.style.display = 'none';
+                        const mainInterface = document.getElementById('main-interface');
+                        mainInterface.style.display = 'flex';
+                        mainInterface.style.pointerEvents = 'auto';
+
+                        anime.timeline()
+                        .add({
+                            targets: mainInterface,
+                            opacity: [0, 1],
+                            duration: 300,
+                            easing: 'linear'
+                        })
+                        .add({
+                            targets: '.feature-card',
+                            opacity: [0, 1],
+                            translateX: function(el) {
+                                return el.classList.contains('card-right') ? [40, 0] : [-40, 0];
+                            },
+                            delay: anime.stagger(150),
+                            duration: 600,
+                            easing: 'easeOutQuart'
+                        }, '-=100');
+                    }
+                });
+            });
+
+            // --- Subpage Logic ---
+            const cards = document.querySelectorAll('.feature-card');
+            const subpageContainer = document.getElementById('subpage-container');
+            const subpageTitle = document.getElementById('subpage-title');
+            const backBtn = document.getElementById('back-btn');
+            const mainInterface = document.getElementById('main-interface');
+            
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const title = card.querySelector('h2').innerText;
+                    subpageTitle.innerText = title;
+                    
+                    subpageContainer.style.display = 'flex';
+                    
+                    anime({
+                        targets: mainInterface,
+                        opacity: 0,
+                        duration: 300,
+                        easing: 'linear',
+                        complete: () => {
+                            mainInterface.style.display = 'none';
+                            anime({
+                                targets: subpageContainer,
+                                opacity: [0, 1],
+                                scale: [0.95, 1],
+                                duration: 400,
+                                easing: 'easeOutQuad'
+                            });
+                        }
+                    });
+                });
+            });
+
+            backBtn.addEventListener('click', () => {
+                mainInterface.style.display = 'flex';
+                anime({
+                    targets: subpageContainer,
+                    opacity: 0,
+                    scale: [1, 0.95],
+                    duration: 300,
+                    easing: 'linear',
+                    complete: () => {
+                        subpageContainer.style.display = 'none';
+                        anime({
+                            targets: mainInterface,
+                            opacity: [0, 1],
+                            duration: 400,
+                            easing: 'easeOutQuad'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <!-- NEW TECH CARD MODAL -->
+    <div id="tech-card-modal">
+        <div id="tech-card-scaler">
+            <div id="tech-card">
+                <button id="close-tech-card">×</button>
+                <div class="tc-header">
+                    <div class="tc-logo">Mano<span style="color:#00d4ff">Take</span></div>
+                    <div class="tc-label">Part Information</div>
+                </div>
+                <div class="tc-divider"></div>
+                <div class="tc-image-box">
+                    <div class="tc-camera">📷</div>
+                    <div class="tc-image-text">Image Coming Soon</div>
+                </div>
+                <div id="tc-comp-name">RTX 4090</div>
+                <div id="tc-grid"></div>
+                <div class="tc-footer">
+                    <div class="tc-foot-box">
+                        <div class="tc-foot-label">Market Price</div>
+                        <div class="tc-foot-val" id="tc-price">$ ---</div>
+                    </div>
+                    <div class="tc-foot-box tc-foot-box-right">
+                        <div class="tc-foot-label">Rating</div>
+                        <div class="tc-foot-val" id="tc-rating">--- / 10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        window.addEventListener('load', () => {
+            const compData = {
+                CPU: {
+                    desc: "The Central Processing Unit, the brain of your PC.",
+                    stats: ["Cores", "Clock", "TDP", "Socket", "Cache", "Architecture"]
+                },
+                GPU: {
+                    desc: "Graphics Processing Unit, renders images and video.",
+                    stats: ["VRAM", "Core Clock", "Memory Bus", "TDP", "Architecture", "CUDA Cores"]
+                },
+                RAM: {
+                    desc: "Random Access Memory, temporary fast storage.",
+                    stats: ["Capacity", "Speed", "Type", "Latency", "Voltage", "Form Factor"]
+                },
+                Motherboard: {
+                    desc: "The main circuit board that connects everything.",
+                    stats: ["Socket", "Chipset", "Form Factor", "RAM Slots", "PCIe", "Max RAM"]
+                },
+                Storage: {
+                    desc: "Long-term data storage (SSD/HDD).",
+                    stats: ["Capacity", "Read Speed", "Write Speed", "Interface", "Form Factor", "TBW"]
+                },
+                PSU: {
+                    desc: "Power Supply Unit, provides power to all components.",
+                    stats: ["Wattage", "Efficiency", "Modularity", "Fan Size", "Protection", "Certification"]
+                }
+            };
+
+            let selectedType = null;
+            
+            // Hook into subpage transitions smoothly after initial event listeners are set
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.feature-card');
+                const piView = document.getElementById('part-info-view');
+                const backBtn = document.getElementById('back-btn');
+                const subTitle = document.getElementById('subpage-title');
+                
+                cards.forEach((card, i) => {
+                    card.addEventListener('click', () => {
+                        if(i === 0) {
+                            subTitle.style.display = 'none';
+                            piView.style.display = 'flex';
+                            backBtn.style.top = '75px';
+                            backBtn.style.zIndex = '50';
+                            anime({ targets: piView, opacity: [0, 1], duration: 500, easing: 'linear' });
+                        } else {
+                            subTitle.style.display = 'block';
+                            piView.style.display = 'none';
+                            backBtn.style.top = '25px';
+                        }
+                    });
+                });
+                
+                backBtn.addEventListener('click', () => {
+                    piView.style.display = 'none';
+                    piView.style.opacity = '0';
+                    subTitle.style.display = 'block';
+                    backBtn.style.top = '25px';
+                });
+            }, 100);
+
+            // Component selection functionality
+            const compItems = document.querySelectorAll('.comp-item');
+            const bottomSec = document.getElementById('pi-bottom-section');
+            const piDef = document.getElementById('pi-definition');
+            
+            compItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    compItems.forEach(c => c.classList.remove('active'));
+                    item.classList.add('active');
+                    selectedType = item.dataset.type;
+                    piDef.innerText = compData[selectedType].desc;
+                    
+                    if(bottomSec.style.display !== 'flex') {
+                        bottomSec.style.display = 'flex';
+                        anime({ targets: bottomSec, opacity: [0, 1], translateY: [15, 0], duration: 400, easing: 'easeOutQuad' });
+                    }
+                });
+            });
+
+            // Modal functionality
+            const techModal = document.getElementById('tech-card-modal');
+            const grid = document.getElementById('tc-grid');
+            const compName = document.getElementById('tc-comp-name');
+            const piSearch = document.getElementById('pi-search');
+            
+            function resizeTechCard() {
+                if(techModal.style.display === 'flex') {
+                    let s = Math.min((window.innerWidth - 40) / 1080, (window.innerHeight - 40) / 1350);
+                    if(s > 1) s = 1;
+                    document.getElementById('tech-card-scaler').style.transform = `scale(${s})`;
+                    return s;
+                }
+                return 1;
+            }
+            window.addEventListener('resize', resizeTechCard);
+            
+            document.getElementById('pi-build-btn').addEventListener('click', () => {
+                if(!selectedType) return;
+                
+                const stats = compData[selectedType].stats;
+                let title = piSearch.value.trim();
+                if(!title) title = selectedType + ' Model';
+                
+                compName.innerText = title;
+                grid.innerHTML = '';
+                
+                const icons = ['⚡', '⚙️', '🔄', '📐', '🔋', '💾'];
+                stats.forEach((st, idx) => {
+                    const icon = icons[idx % icons.length];
+                    grid.innerHTML += `<div class="tc-item"><div class="tc-item-icon">${icon}</div><div class="tc-item-label">${st}</div><div class="tc-item-val">---</div></div>`;
+                });
+                
+                techModal.style.display = 'flex';
+                const s = resizeTechCard();
+                anime({ targets: techModal, opacity: [0, 1], duration: 300, easing: 'linear' });
+                
+                // Small trick, reset CSS scale explicitly after Anime JS
+                anime({
+                    targets: '#tech-card-scaler',
+                    scale: [s * 0.8, s],
+                    opacity: [0, 1],
+                    duration: 400,
+                    easing: 'easeOutBack',
+                    complete: () => {
+                        document.getElementById('tech-card-scaler').style.transform = `scale(${resizeTechCard()})`;
+                    }
+                });
+            });
+            
+            document.getElementById('close-tech-card').addEventListener('click', () => {
+                let currentScale = document.getElementById('tech-card-scaler').style.transform.replace(/[^0-9.]/g, '');
+                if(!currentScale) currentScale = 1;
+                anime({ 
+                    targets: techModal, opacity: [1, 0], duration: 300, easing: 'linear', 
+                    complete: () => { techModal.style.display = 'none'; } 
+                });
+                anime({
+                    targets: '#tech-card-scaler', scale: [currentScale, currentScale * 0.9], 
+                    duration: 250, easing: 'easeInQuad' 
+                });
+            });
+        });
+    </script>
+</body>
+</html>
