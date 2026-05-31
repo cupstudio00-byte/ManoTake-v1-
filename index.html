@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <!-- Anime.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="/src/db.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
         
@@ -488,6 +489,27 @@
         .pi-search::placeholder { color: rgba(255,255,255,0.4); }
         .pi-search:focus { box-shadow: 0 0 15px rgba(0,212,255,0.3), inset 0 0 10px rgba(0,212,255,0.2); border-color: #fff; }
         
+        .pi-suggestions {
+            position: absolute; top: calc(100% - 15px); left: 0; right: 0; background: rgba(10, 10, 15, 0.95);
+            border: 1px solid #00d4ff; border-top: none; border-radius: 0 0 6px 6px;
+            max-height: 200px; overflow-y: auto; z-index: 100; display: none;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            text-align: left;
+            /* Scrollbar for suggestions */
+            scrollbar-width: thin;
+            scrollbar-color: #00d4ff transparent;
+        }
+        .pi-suggestions::-webkit-scrollbar { width: 6px; }
+        .pi-suggestions::-webkit-scrollbar-track { background: transparent; }
+        .pi-suggestions::-webkit-scrollbar-thumb { background-color: #00d4ff; border-radius: 10px; }
+        
+        .pi-suggestion-item {
+            padding: 10px 15px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid rgba(0,212,255,0.1);
+        }
+        .pi-suggestion-item:last-child { border-bottom: none; }
+        .pi-suggestion-item:hover { background: rgba(0, 212, 255, 0.2); }
+        
         .pi-build-btn {
             padding: 12px 35px; background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #fff;
             font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; border-radius: 6px;
@@ -503,15 +525,22 @@
         }
         #tech-card-scaler { transform-origin: center center; }
         #tech-card {
-            width: 1080px; height: 1350px; background: #0a0a0f; border: 2px solid #00d4ff;
-            box-shadow: 0 0 50px rgba(0,212,255,0.2), inset 0 0 30px rgba(0,212,255,0.1);
+            width: 1080px; height: 1350px; background: #070b14;
+            background-image: 
+                radial-gradient(circle at top center, rgba(0, 212, 255, 0.15) 0%, transparent 60%),
+                linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            border: 2px solid rgba(0,212,255,0.5);
+            box-shadow: 0 0 40px rgba(0,212,255, 0.2);
             padding: 60px; box-sizing: border-box; position: relative; display: flex; flex-direction: column;
         }
         #close-tech-card {
-            position: absolute; top: 35px; right: 45px; border: none; background: transparent;
+            position: absolute; top: 30px; right: 40px; border: none; background: transparent;
             color: #00d4ff; font-size: 55px; font-weight: 300; cursor: pointer; transition: 0.3s;
             text-shadow: 0 0 15px #00d4ff; line-height: 1; padding: 0; margin: 0;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            z-index: 1000;
         }
         #close-tech-card:hover { transform: scale(1.15); color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8); }
         
@@ -521,9 +550,10 @@
         .tc-divider { width: 100%; height: 2px; background: #00d4ff; margin-bottom: 60px; box-shadow: 0 0 10px #00d4ff; opacity: 0.7; }
         
         .tc-image-box {
-            width: 300px; height: 200px; background: #1a1a2e; border: 1px solid #00d4ff;
+            width: 320px; height: 220px; background: rgba(10, 15, 30, 0.8); border: 1px solid rgba(0,212,255,0.5);
             margin: 0 auto 50px auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 20px rgba(0,212,255,0.1); border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,212,255,0.1); border-radius: 12px;
+            position: relative;
         }
         .tc-camera { font-size: 50px; opacity: 0.5; margin-bottom: 12px; color: transparent; text-shadow: 0 0 0 #00d4ff; }
         .tc-image-text { font-size: 16px; color: #00d4ff; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
@@ -536,9 +566,14 @@
         
         #tc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
         .tc-item {
-            background: #1a1a2e; border: 1px solid #00d4ff; border-radius: 8px; height: 180px;
+            background: linear-gradient(135deg, #111827 0%, #0b0f19 100%); border: 1px solid rgba(0,212,255,0.4); border-radius: 12px; height: 180px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 15px rgba(0,212,255,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,212,255,0.05);
+            position: relative; overflow: hidden;
+        }
+        .tc-item::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent); opacity: 0.5;
         }
         .tc-item-icon { font-size: 40px; margin-bottom: 15px; color: transparent; text-shadow: 0 0 0 #b0c4de; }
         .tc-item-label { font-size: 16px; color: #b0c4de; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -546,13 +581,34 @@
         
         .tc-footer { display: flex; justify-content: space-between; margin-top: auto; padding-top: 50px; }
         .tc-foot-box {
-            background: #1a1a2e; border: 1px solid #00d4ff; border-radius: 8px; padding: 25px 50px;
+            background: linear-gradient(135deg, #111827 0%, #0b0f19 100%); border: 1px solid rgba(0,212,255,0.4); border-radius: 12px; padding: 25px 50px;
             display: flex; flex-direction: column; justify-content: center; gap: 8px; align-items: flex-start;
-            box-shadow: inset 0 0 15px rgba(0,212,255,0.1); width: 45%; box-sizing: border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,212,255,0.05); width: 45%; box-sizing: border-box;
+            position: relative; overflow: hidden;
         }
         .tc-foot-box-right { align-items: flex-end; }
         .tc-foot-label { font-size: 18px; color: #fff; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px; }
         .tc-foot-val { font-family: 'Orbitron', sans-serif; font-size: 38px; color: #00d4ff; text-shadow: 0 0 15px rgba(0,212,255,0.5); font-weight: 700; }
+        
+        .global-download-btn {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 30px; background: rgba(0, 212, 255, 0.1);
+            border: 1px solid #00d4ff; border-radius: 8px;
+            color: #00d4ff; font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px; font-weight: 600; letter-spacing: 1px;
+            cursor: pointer; transition: all 0.3s; z-index: 100;
+            box-shadow: 0 0 15px rgba(0,212,255,0.2);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+        }
+        .global-download-btn:hover {
+            background: #00d4ff; color: #0a0a0f;
+            box-shadow: 0 0 25px rgba(0,212,255,0.6);
+            transform: translateX(-50%) translateY(-2px);
+        }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spin { animation: spin 2s linear infinite; }
         
         @media (max-width: 600px) {
             .comp-grid { grid-template-columns: repeat(3, 100px); gap: 10px; margin-bottom: 15px; }
@@ -779,16 +835,19 @@
             </div>
             <div class="pi-content-area">
                 <div class="comp-grid">
-                    <div class="comp-item" data-type="CPU"><div class="comp-icon">💻</div><div class="comp-label">CPU</div></div>
-                    <div class="comp-item" data-type="GPU"><div class="comp-icon">🖥️</div><div class="comp-label">GPU</div></div>
-                    <div class="comp-item" data-type="RAM"><div class="comp-icon">🕹️</div><div class="comp-label">RAM</div></div>
-                    <div class="comp-item" data-type="Motherboard"><div class="comp-icon">🖲️</div><div class="comp-label">Motherboard</div></div>
-                    <div class="comp-item" data-type="Storage"><div class="comp-icon">💽</div><div class="comp-label">Storage</div></div>
-                    <div class="comp-item" data-type="PSU"><div class="comp-icon">🔌</div><div class="comp-label">PSU</div></div>
+                    <div class="comp-item" data-type="CPU"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><rect x="4" y="4" width="16" height="16" rx="1"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg><div class="comp-label">CPU</div></div>
+                    <div class="comp-item" data-type="GPU"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><rect x="2" y="7" width="20" height="12" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><line x1="6" y1="11" x2="6" y2="15"/><line x1="10" y1="11" x2="10" y2="15"/><line x1="14" y1="11" x2="14" y2="15"/><line x1="18" y1="11" x2="18" y2="15"/></svg><div class="comp-label">GPU</div></div>
+                    <div class="comp-item" data-type="RAM"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><rect x="2" y="6" width="20" height="12" rx="1"/><line x1="6" y1="6" x2="6" y2="18"/><line x1="10" y1="6" x2="10" y2="18"/><line x1="14" y1="6" x2="14" y2="18"/><line x1="18" y1="6" x2="18" y2="18"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="2" y1="14" x2="22" y2="14"/></svg><div class="comp-label">RAM</div></div>
+                    <div class="comp-item" data-type="Motherboard"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><rect x="2" y="2" width="20" height="20" rx="2"/><rect x="6" y="6" width="5" height="5" rx="1"/><rect x="13" y="6" width="5" height="5" rx="1"/><line x1="6" y1="14" x2="18" y2="14"/><line x1="6" y1="17" x2="12" y2="17"/><line x1="6" y1="2" x2="6" y2="5"/><line x1="10" y1="2" x2="10" y2="5"/><line x1="14" y1="2" x2="14" y2="5"/><line x1="18" y1="2" x2="18" y2="5"/></svg><div class="comp-label">Motherboard</div></div>
+                    <div class="comp-item" data-type="Storage"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg><div class="comp-label">Storage</div></div>
+                    <div class="comp-item" data-type="PSU"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg><div class="comp-label">PSU</div></div>
                 </div>
                 <div id="pi-bottom-section">
                     <div id="pi-definition" class="pi-definition">Select a component...</div>
-                    <input type="text" id="pi-search" class="pi-search" placeholder="Search for a model... e.g. RTX 4090">
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="pi-search" class="pi-search" placeholder="Search for a model...">
+                        <div id="pi-suggestions" class="pi-suggestions"></div>
+                    </div>
                     <button id="pi-build-btn" class="pi-build-btn">Build Card</button>
                 </div>
             </div>
@@ -1107,9 +1166,9 @@
     
     <!-- NEW TECH CARD MODAL -->
     <div id="tech-card-modal">
+        <button id="close-tech-card">×</button>
         <div id="tech-card-scaler">
             <div id="tech-card">
-                <button id="close-tech-card">×</button>
                 <div class="tc-header">
                     <div class="tc-logo">Mano<span style="color:#00d4ff">Take</span></div>
                     <div class="tc-label">Part Information</div>
@@ -1133,6 +1192,14 @@
                 </div>
             </div>
         </div>
+        <button id="download-card-btn" class="global-download-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Card
+        </button>
     </div>
     
     <script>
@@ -1221,6 +1288,7 @@
             const grid = document.getElementById('tc-grid');
             const compName = document.getElementById('tc-comp-name');
             const piSearch = document.getElementById('pi-search');
+            const piSuggestions = document.getElementById('pi-suggestions');
             
             function resizeTechCard() {
                 if(techModal.style.display === 'flex') {
@@ -1233,21 +1301,94 @@
             }
             window.addEventListener('resize', resizeTechCard);
             
-            document.getElementById('pi-build-btn').addEventListener('click', () => {
+            // Search Input Suggestions Logic
+            piSearch.addEventListener('input', () => {
+                if(!selectedType) return;
+                const query = piSearch.value.trim().toLowerCase();
+                
+                let availableComps = window.hardwareDatabase ? window.hardwareDatabase.filter(c => c.type === selectedType) : [];
+                
+                if(!query) {
+                    // Show all available components if query is empty
+                    if(availableComps.length > 0) {
+                        renderSuggestions(availableComps);
+                    } else {
+                        piSuggestions.style.display = 'none';
+                    }
+                    return;
+                }
+                
+                let matches = availableComps.filter(c => c.name.toLowerCase().includes(query));
+                
+                if(matches.length > 0) {
+                    renderSuggestions(matches);
+                } else {
+                    piSuggestions.style.display = 'none';
+                }
+            });
+            
+            piSearch.addEventListener('focus', () => {
+                // Trigger input logic to show list on format
+                piSearch.dispatchEvent(new Event('input'));
+            });
+            
+            function renderSuggestions(matches) {
+                piSuggestions.innerHTML = '';
+                matches.forEach(m => {
+                    let div = document.createElement('div');
+                    div.className = 'pi-suggestion-item';
+                    div.textContent = m.name;
+                    div.addEventListener('click', () => {
+                        piSearch.value = m.name;
+                        piSuggestions.style.display = 'none';
+                    });
+                    piSuggestions.appendChild(div);
+                });
+                piSuggestions.style.display = 'block';
+            }
+            
+            document.addEventListener('click', (e) => {
+                if(!piSearch.contains(e.target) && !piSuggestions.contains(e.target)) {
+                    piSuggestions.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('pi-build-btn').addEventListener('click', async () => {
                 if(!selectedType) return;
                 
-                const stats = compData[selectedType].stats;
-                let title = piSearch.value.trim();
-                if(!title) title = selectedType + ' Model';
+                let title = piSearch.value.trim().toLowerCase();
                 
-                compName.innerText = title;
+                // Search Database
+                let availableComps = window.hardwareDatabase ? window.hardwareDatabase.filter(c => c.type === selectedType) : [];
+                let component = null;
+                
+                if (title && availableComps.length > 0) {
+                    component = availableComps.find(c => c.name.toLowerCase() === title || c.name.toLowerCase().includes(title));
+                }
+                if (!component && availableComps.length > 0) {
+                    component = availableComps[Math.floor(Math.random() * availableComps.length)];
+                }
+                
+                if (!component) {
+                    component = { name: title || selectedType + ' Model', stats: { 'Sample': '---' }, price: '$ ---', rating: '--- / 10' };
+                }
+                
+                compName.innerText = component.name;
                 grid.innerHTML = '';
                 
+                document.getElementById('tc-price').innerText = component.price || '$ ---';
+                document.getElementById('tc-rating').innerText = component.rating ? component.rating + ' / 10' : '--- / 10';
+                
+                const stats = component.stats;
                 const icons = ['⚡', '⚙️', '🔄', '📐', '🔋', '💾'];
-                stats.forEach((st, idx) => {
+                Object.keys(stats).forEach((st, idx) => {
                     const icon = icons[idx % icons.length];
-                    grid.innerHTML += `<div class="tc-item"><div class="tc-item-icon">${icon}</div><div class="tc-item-label">${st}</div><div class="tc-item-val">---</div></div>`;
+                    grid.innerHTML += `<div class="tc-item"><div class="tc-item-icon">${icon}</div><div class="tc-item-label">${st}</div><div class="tc-item-val">${stats[st]}</div></div>`;
                 });
+                
+                // Blank space for image
+                const imgBox = document.querySelector('.tc-image-box');
+                imgBox.innerHTML = '';
                 
                 techModal.style.display = 'flex';
                 const s = resizeTechCard();
@@ -1277,6 +1418,62 @@
                     targets: '#tech-card-scaler', scale: [currentScale, currentScale * 0.9], 
                     duration: 250, easing: 'easeInQuad' 
                 });
+            });
+
+            document.getElementById('download-card-btn').addEventListener('click', async () => {
+                const card = document.getElementById('tech-card');
+                const btn = document.getElementById('download-card-btn');
+                const originalText = btn.innerHTML;
+                
+                try {
+                    btn.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Generating...`;
+                    
+                    if(!window.html2canvas){
+                        await new Promise((res,rej)=>{
+                            const sc=document.createElement('script');
+                            sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                            sc.onload=res; sc.onerror=rej;
+                            document.head.appendChild(sc);
+                        });
+                    }
+                    
+                    // Create clone to prevent viewport clipping
+                    const clone = card.cloneNode(true);
+                    Object.assign(clone.style, {
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
+                        zIndex: '-9999',
+                        transform: 'none',
+                        margin: '0',
+                        backgroundColor: '#070b14', // Match the base dark background
+                    });
+                    
+                    document.body.appendChild(clone);
+                    
+                    const cvs = await html2canvas(clone, {
+                        scale: 1, 
+                        useCORS: true,
+                        backgroundColor: '#070b14',
+                        width: 1080, 
+                        height: 1350,
+                        windowWidth: 1080,
+                        windowHeight: 1350,
+                        logging: false
+                    });
+                    
+                    document.body.removeChild(clone);
+                    
+                    const link=document.createElement('a');
+                    const name=document.getElementById('tc-comp-name').textContent.replace(/\s+/g,'_');
+                    link.download=`ManoTake-${name}.png`;
+                    link.href=cvs.toDataURL('image/png');
+                    link.click();
+                } catch(e) { 
+                    alert('Download failed =(. Try again.');
+                } finally {
+                    btn.innerHTML = originalText;
+                }
             });
         });
     </script>
