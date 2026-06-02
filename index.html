@@ -285,6 +285,8 @@
             color: #fff;
             cursor: pointer;
             transition: all 0.3s ease;
+            transform: translateZ(0);
+            will-change: transform, color;
         }
 
         .nav-icon:hover {
@@ -646,6 +648,115 @@
         }
         .pi-build-btn:hover { background: var(--primary); color: #0a0a0f; box-shadow: 0 0 20px var(--primary); }
         
+        /* --- BEST COMBO VIEW --- */
+        #best-combo-view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: transparent; z-index: 10; display: none;
+            flex-direction: column; opacity: 1;
+        }
+        .bc-content-area {
+            flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; justify-content: flex-start; box-sizing: border-box;
+        }
+        .bc-choices-container {
+            display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 800px; margin-bottom: 30px; width: 100%;
+        }
+        .bc-choice-card {
+            min-width: 250px; flex: 1; cursor: pointer; flex-direction: column; text-align: center;
+        }
+        .bc-choice-card .card-icon { margin-bottom: 10px; }
+        .bc-choice-card .card-text h2 { margin-bottom: 8px; font-size: 20px; }
+        .bc-input-section {
+            width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 20px;
+            background: rgba(10, 10, 15, 0.6); backdrop-filter: blur(5px);
+            border: 1px solid rgba(var(--primary-rgb), 0.2); padding: 25px; border-radius: 12px;
+        }
+        .bc-toggle-group {
+            display: flex; gap: 10px; width: 100%;
+        }
+        .bc-toggle-btn {
+            flex: 1; padding: 10px; background: transparent; border: 1px solid var(--primary);
+            color: var(--primary); border-radius: 6px; cursor: pointer; font-family: 'Orbitron', sans-serif;
+            font-weight: 600; transition: all 0.3s;
+        }
+        .bc-toggle-btn.active {
+            background: var(--primary); color: #0a0a0f; box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.4);
+        }
+        [data-theme="white"] .bc-input-section {
+            background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0,0,0,0.1);
+        }
+        [data-theme="white"] .bc-toggle-btn.active {
+            background: var(--primary); color: #fff;
+        }
+
+        /* --- COMBO CARD MODAL --- */
+        #combo-card-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.85);
+            z-index: 1000; display: none; opacity: 0;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        #combo-card-scaler { 
+            position: absolute; top: 50%; left: 50%; transform-origin: center center;
+            display: flex; align-items: center; justify-content: center;
+            margin-left: -540px; margin-top: -675px; 
+        }
+        #combo-card {
+            width: 1080px; height: 1350px; background: var(--bg-card);
+            border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px 80px; box-sizing: border-box; position: relative; display: flex; flex-direction: column;
+            color: var(--primary); font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: 
+                linear-gradient(rgba(var(--primary-rgb), 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(var(--primary-rgb), 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        [data-theme="white"] #combo-card { box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        #close-combo-card {
+            position: absolute; top: 15px; right: 25px; border: none; background: transparent;
+            color: var(--primary); font-size: 45px; font-weight: 300; cursor: pointer; transition: 0.3s;
+            line-height: 1; padding: 0; margin: 0; z-index: 1000;
+        }
+        #close-combo-card:hover { transform: scale(1.15); opacity: 0.7; }
+
+        .cc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .cc-logo { font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(var(--primary-rgb),0.6); }
+        [data-theme="white"] .cc-logo { color: var(--primary); text-shadow: none; }
+        .cc-logo span { color: var(--primary); text-shadow: none; }
+        .cc-title { font-family: 'Orbitron', sans-serif; font-size: 38px; color: #fff; font-weight: 800; letter-spacing: 3px; }
+        [data-theme="white"] .cc-title { color: var(--primary); }
+        .cc-divider { width: 100%; height: 2px; background: var(--primary); box-shadow: 0 0 10px var(--primary); margin-bottom: 40px; }
+
+        .cc-components { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .cc-side { width: 440px; display: flex; flex-direction: column; align-items: center; }
+        .cc-plus { font-size: 70px; font-family: 'Orbitron', sans-serif; color: var(--primary); font-weight: 800; text-shadow: 0 0 15px rgba(var(--primary-rgb),0.6); }
+        .cc-side .tc-image-box { width: 100%; height: 360px; margin-bottom: 25px; border-radius: 20px; }
+        .cc-side h3 { font-size: 32px; font-weight: 800; margin: 0 0 15px 0; text-align: center; }
+        .cc-rating { font-size: 24px; font-weight: 800; color: var(--primary); display: flex; gap: 10px; align-items: center; }
+        .cc-stars { color: #ffd700; letter-spacing: 2px; }
+
+        .cc-section-label { font-size: 20px; font-weight: 800; letter-spacing: 4px; color: var(--primary); opacity: 0.8; margin-bottom: 15px; }
+        
+        .cc-compat-section { margin-bottom: 40px; }
+        .cc-compat-bar-wrap { width: 100%; height: 40px; background: #1a1a2e; border-radius: 20px; position: relative; overflow: hidden; border: 1px solid rgba(var(--primary-rgb), 0.2); }
+        [data-theme="white"] .cc-compat-bar-wrap { background: #f0f0f0; border: 1px solid #e0e0e0; }
+        .cc-compat-bar-fill { height: 100%; width: 0%; border-radius: 20px; background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.4), var(--primary)); box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.5); }
+        .cc-compat-value { position: absolute; right: 20px; top: 0; line-height: 40px; font-size: 20px; font-weight: 800; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        [data-theme="white"] .cc-compat-value { color: #000; text-shadow: none; }
+
+        .cc-fps-section { margin-bottom: 50px; }
+        .cc-fps-columns { display: flex; justify-content: space-around; align-items: flex-end; height: 180px; }
+        .cc-fps-col { display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; width: 120px; }
+        .cc-fps-res { font-size: 18px; font-weight: 800; letter-spacing: 2px; opacity: 0.8; }
+        .cc-fps-bar-container { height: 140px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+        .cc-fps-val { font-size: 34px; font-weight: 900; margin-bottom: 15px; font-family: 'Orbitron', sans-serif; }
+        .cc-fps-bar { width: 60px; height: 0%; border-radius: 8px 8px 0 0; }
+
+        .cc-footer { display: flex; gap: 40px; margin-top: auto; }
+        .cc-footer-box { flex: 1; background: rgba(var(--primary-rgb), 0.05); border: 1px solid rgba(var(--primary-rgb), 0.2); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
+        [data-theme="white"] .cc-footer-box { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .cc-footer-label { font-size: 16px; opacity: 0.7; letter-spacing: 3px; font-weight: 800; margin-bottom: 10px; }
+        .cc-footer-val { font-size: 42px; font-weight: 900; letter-spacing: -1px; display: flex; align-items: center; justify-content: space-between; }
+        .cc-best-for svg { width: 36px; height: 36px; color: var(--primary); }
+        
         /* --- TECH CARD CSS --- */
         #tech-card-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.85);
@@ -978,6 +1089,100 @@
                 </div>
             </div>
         </div>
+
+        <!-- BEST COMBO VIEW -->
+        <div id="best-combo-view">
+            <nav id="bc-top-nav" class="pi-nav">
+                <div class="nav-brand">Mano<span style="color:var(--primary)">Take</span></div>
+                <div class="nav-icons">
+                    <svg id="theme-toggle-bc" class="nav-icon theme-toggle-btn" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Account icon (person) -->
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+            </nav>
+            <div class="pi-header">
+                <div class="pi-title">Best Combo</div>
+                <div class="pi-divider"></div>
+            </div>
+            
+            <div class="bc-content-area">
+                <div class="bc-choices-container">
+                    <!-- Choice Card 1: Budget -->
+                    <div class="feature-card bc-choice-card" id="bc-choice-budget">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                                <circle cx="16" cy="16" r="2"></circle>
+                            </svg>
+                        </div>
+                        <div class="card-text">
+                            <h2>I have a Budget</h2>
+                            <p>Enter your budget and get the best CPU + GPU combination</p>
+                        </div>
+                        <div class="arrow arrow-right">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Choice Card 2: Part -->
+                    <div class="feature-card bc-choice-card" id="bc-choice-part">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect>
+                                <line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line>
+                                <line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line>
+                                <line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line>
+                            </svg>
+                        </div>
+                        <div class="card-text">
+                            <h2>I have a Part</h2>
+                            <p>Already own a CPU or GPU? Find its perfect match</p>
+                        </div>
+                        <div class="arrow arrow-right">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Input Section -->
+                <div id="bc-budget-section" class="bc-input-section" style="display:none;">
+                    <div class="bc-toggle-group">
+                        <button class="bc-toggle-btn active" id="btn-curr-usd">$ USD</button>
+                        <button class="bc-toggle-btn" id="btn-curr-eur">€ EUR</button>
+                    </div>
+                    <input type="number" id="bc-budget-input" class="pi-search" placeholder="Enter your budget...">
+                    <button id="bc-build-budget-btn" class="pi-build-btn">Build Combo</button>
+                </div>
+
+                <!-- Part Input Section -->
+                <div id="bc-part-section" class="bc-input-section" style="display:none;">
+                    <div class="bc-toggle-group">
+                        <button class="bc-toggle-btn active" id="btn-part-cpu">I have a CPU</button>
+                        <button class="bc-toggle-btn" id="btn-part-gpu">I have a GPU</button>
+                    </div>
+                    <input type="text" id="bc-part-input" class="pi-search" placeholder="Search CPU... e.g. i9-14900K">
+                    <button id="bc-build-part-btn" class="pi-build-btn">Build Combo</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1237,7 +1442,7 @@
             });
 
             // --- Subpage Logic ---
-            const cards = document.querySelectorAll('.feature-card');
+            const cards = document.querySelectorAll('#main-interface .feature-card');
             const subpageContainer = document.getElementById('subpage-container');
             const subpageTitle = document.getElementById('subpage-title');
             const backBtn = document.getElementById('back-btn');
@@ -1270,6 +1475,32 @@
             });
 
             backBtn.addEventListener('click', () => {
+                const bcChoiceContainer = document.querySelector('.bc-choices-container');
+                const piView = document.getElementById('part-info-view');
+                const bcView = document.getElementById('best-combo-view');
+
+                // Case 1: Within Best Combo view, and not looking at the main choice cards
+                if (bcView.style.display === 'flex' && bcChoiceContainer.style.display === 'none') {
+                    // Go back to choice cards
+                    document.getElementById('bc-budget-section').style.display = 'none';
+                    document.getElementById('bc-part-section').style.display = 'none';
+                    bcChoiceContainer.style.display = 'flex';
+                    anime({ targets: '.bc-choice-card', opacity: [0, 1], scale: [0.8, 1], delay: anime.stagger(150), duration: 600, easing: 'easeOutElastic(1, .8)' });
+                    return;
+                }
+
+                // Case 2: Looking at Part Info view or Best Combo choice cards
+                if (piView.style.display === 'flex' || bcView.style.display === 'flex') {
+                    piView.style.display = 'none';
+                    piView.style.opacity = '0';
+                    bcView.style.display = 'none';
+                    bcView.style.opacity = '0';
+                    subpageTitle.style.display = 'block';
+                    backBtn.style.top = '25px';
+                    return;
+                }
+
+                // Case 3: Default subpageContainer view (the empty Title view for the other cards)
                 mainInterface.style.display = 'flex';
                 anime({
                     targets: subpageContainer,
@@ -1325,6 +1556,92 @@
         </button>
     </div>
     
+    <!-- COMBO CARD MODAL -->
+    <div id="combo-card-modal">
+        <button id="close-combo-card">×</button>
+        <div id="combo-card-scaler">
+            <div id="combo-card">
+                <div class="cc-header">
+                    <div class="cc-logo">Mano<span>Take</span></div>
+                    <div class="cc-title">BEST COMBO</div>
+                </div>
+                <div class="cc-divider"></div>
+                
+                <div class="cc-components">
+                    <div class="cc-side cc-cpu">
+                        <div class="tc-image-box">
+                            <div class="tc-placeholder" style="color:var(--primary); opacity:0.5; font-family:'Orbitron', sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase;">Image Coming Soon</div>
+                        </div>
+                        <h3 id="cc-cpu-name">Intel Core i9-14900K</h3>
+                        <div class="cc-rating"><span class="cc-stars">★★★★★</span> <span id="cc-cpu-rating">9.2</span> / 10</div>
+                    </div>
+                    
+                    <div class="cc-plus">+</div>
+                    
+                    <div class="cc-side cc-gpu">
+                        <div class="tc-image-box">
+                            <div class="tc-placeholder" style="color:var(--primary); opacity:0.5; font-family:'Orbitron', sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase;">Image Coming Soon</div>
+                        </div>
+                        <h3 id="cc-gpu-name">RTX 4090</h3>
+                        <div class="cc-rating"><span class="cc-stars">★★★★★</span> <span id="cc-gpu-rating">9.4</span> / 10</div>
+                    </div>
+                </div>
+                
+                <div class="cc-compat-section">
+                    <div class="cc-section-label">COMPATIBILITY</div>
+                    <div class="cc-compat-bar-wrap">
+                        <div class="cc-compat-bar-fill" id="cc-compat-fill"></div>
+                        <div class="cc-compat-value" id="cc-compat-val">94%</div>
+                    </div>
+                </div>
+                
+                <div class="cc-fps-section">
+                    <div class="cc-section-label" style="text-align: center;">ESTIMATED FPS</div>
+                    <div class="cc-fps-columns">
+                        <div class="cc-fps-col">
+                            <div class="cc-fps-res">1080P</div>
+                            <div class="cc-fps-bar-container">
+                                <div class="cc-fps-val" id="cc-fps-1080">165</div>
+                                <div class="cc-fps-bar" id="cc-bar-1080" style="background:#1a7a1a;"></div>
+                            </div>
+                        </div>
+                        <div class="cc-fps-col">
+                            <div class="cc-fps-res">1440P</div>
+                            <div class="cc-fps-bar-container">
+                                <div class="cc-fps-val" id="cc-fps-1440">144</div>
+                                <div class="cc-fps-bar" id="cc-bar-1440" style="background:#1a7a1a;"></div>
+                            </div>
+                        </div>
+                        <div class="cc-fps-col">
+                            <div class="cc-fps-res">4K</div>
+                            <div class="cc-fps-bar-container">
+                                <div class="cc-fps-val" id="cc-fps-4k">89</div>
+                                <div class="cc-fps-bar" id="cc-bar-4k" style="background:#4caf50;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cc-footer">
+                    <div class="cc-footer-box">
+                        <div class="cc-footer-label">COMBO PRICE</div>
+                        <div class="cc-footer-val" id="cc-price">$ 1,799</div>
+                    </div>
+                    <div class="cc-footer-box">
+                        <div class="cc-footer-label">BEST FOR</div>
+                        <div class="cc-footer-val cc-best-for">
+                            <span id="cc-best-text">Gaming</span>
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line><line x1="3" y1="20" x2="21" y2="20"></line>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         window.addEventListener('load', () => {
             const compData = {
@@ -1358,33 +1675,123 @@
             
             // Hook into subpage transitions smoothly after initial event listeners are set
             setTimeout(() => {
-                const cards = document.querySelectorAll('.feature-card');
+                const mainCards = document.querySelectorAll('#main-interface .feature-card');
                 const piView = document.getElementById('part-info-view');
+                const bcView = document.getElementById('best-combo-view');
+                const bcChoiceContainer = document.querySelector('.bc-choices-container');
                 const backBtn = document.getElementById('back-btn');
                 const subTitle = document.getElementById('subpage-title');
                 
-                cards.forEach((card, i) => {
+                mainCards.forEach((card, i) => {
                     card.addEventListener('click', () => {
                         if(i === 0) {
                             subTitle.style.display = 'none';
                             piView.style.display = 'flex';
+                            bcView.style.display = 'none';
                             backBtn.style.top = '85px';
                             backBtn.style.zIndex = '50';
                             anime({ targets: piView, opacity: [0, 1], duration: 500, easing: 'linear' });
+                        } else if(i === 1) {
+                            subTitle.style.display = 'none';
+                            piView.style.display = 'none';
+                            bcView.style.display = 'flex';
+                            backBtn.style.top = '85px';
+                            backBtn.style.zIndex = '50';
+                            
+                            // Reset best combo state
+                            document.getElementById('bc-budget-section').style.display = 'none';
+                            document.getElementById('bc-part-section').style.display = 'none';
+                            bcChoiceContainer.style.display = 'flex';
+                            
+                            anime({ targets: '.bc-choice-card', opacity: [0, 1], scale: [0.8, 1], delay: anime.stagger(150), duration: 600, easing: 'easeOutElastic(1, .8)' });
+                            anime({ targets: bcView, opacity: [0, 1], duration: 500, easing: 'linear' });
                         } else {
                             subTitle.style.display = 'block';
                             piView.style.display = 'none';
+                            bcView.style.display = 'none';
                             backBtn.style.top = '25px';
                         }
                     });
                 });
                 
-                backBtn.addEventListener('click', () => {
-                    piView.style.display = 'none';
-                    piView.style.opacity = '0';
-                    subTitle.style.display = 'block';
-                    backBtn.style.top = '25px';
+                // Best Combo specific logic
+                const bcChoiceBudget = document.getElementById('bc-choice-budget');
+                const bcChoicePart = document.getElementById('bc-choice-part');
+                const bcBudgetSec = document.getElementById('bc-budget-section');
+                const bcPartSec = document.getElementById('bc-part-section');
+                
+                bcChoiceBudget.addEventListener('click', () => {
+                    bcChoiceContainer.style.display = 'none';
+                    bcPartSec.style.display = 'none';
+                    bcBudgetSec.style.display = 'flex';
+                    bcBudgetSec.style.opacity = 0;
+                    anime({ targets: bcBudgetSec, opacity: [0,1], translateY: [-20,0], duration: 400, easing: 'easeOutSine' });
                 });
+
+                bcChoicePart.addEventListener('click', () => {
+                    bcChoiceContainer.style.display = 'none';
+                    bcBudgetSec.style.display = 'none';
+                    bcPartSec.style.display = 'flex';
+                    bcPartSec.style.opacity = 0;
+                    anime({ targets: bcPartSec, opacity: [0,1], translateY: [-20,0], duration: 400, easing: 'easeOutSine' });
+                });
+                
+                // Toggle behavior
+                const toggleCurrency = [document.getElementById('btn-curr-usd'), document.getElementById('btn-curr-eur')];
+                toggleCurrency.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        toggleCurrency.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+
+                const togglePart = [document.getElementById('btn-part-cpu'), document.getElementById('btn-part-gpu')];
+                const partInput = document.getElementById('bc-part-input');
+                togglePart.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        togglePart.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        if(btn.id === 'btn-part-cpu') {
+                            partInput.placeholder = "Search CPU... e.g. i9-14900K";
+                        } else {
+                            partInput.placeholder = "Search GPU... e.g. RTX 4090";
+                        }
+                    });
+                });
+
+                // Result card functionality
+                const comboModal = document.getElementById('combo-card-modal');
+                const closeCombo = document.getElementById('close-combo-card');
+                
+                const buildCombo = () => {
+                    comboModal.style.display = 'block';
+                    
+                    // Reset animation states
+                    document.getElementById('cc-compat-fill').style.width = '0%';
+                    document.getElementById('cc-bar-1080').style.height = '0%';
+                    document.getElementById('cc-bar-1440').style.height = '0%';
+                    document.getElementById('cc-bar-4k').style.height = '0%';
+                    
+                    anime({ targets: comboModal, opacity: [0, 1], duration: 300, easing: 'linear' });
+                    anime({ targets: '#combo-card-scaler', scale: [0.9, window.innerWidth < 1100 ? (window.innerWidth / 1120) * 0.9 : 1], duration: 600, easing: 'easeOutElastic(1, .8)' });
+                    
+                    // Animate bars
+                    setTimeout(() => {
+                        anime({ targets: '#cc-compat-fill', width: '94%', duration: 1200, easing: 'easeOutQuart' });
+                        anime({ targets: '#cc-bar-1080', height: '100%', duration: 1000, easing: 'easeOutElastic(1, 1)' });
+                        anime({ targets: '#cc-bar-1440', height: '87%', duration: 1000, delay: 100, easing: 'easeOutElastic(1, 1)' });
+                        anime({ targets: '#cc-bar-4k', height: '54%', duration: 1000, delay: 200, easing: 'easeOutElastic(1, 1)' });
+                    }, 400);
+                };
+
+                document.getElementById('bc-build-budget-btn').addEventListener('click', buildCombo);
+                document.getElementById('bc-build-part-btn').addEventListener('click', buildCombo);
+                
+                closeCombo.addEventListener('click', () => {
+                    anime({ targets: comboModal, opacity: [1, 0], duration: 300, easing: 'linear', complete: () => { comboModal.style.display = 'none'; } });
+                    anime({ targets: '#combo-card-scaler', scale: [window.innerWidth < 1100 ? (window.innerWidth / 1120) * 0.9 : 1, 0.9], duration: 250, easing: 'easeInQuad' });
+                });
+                
             }, 100);
 
             // Component selection functionality
@@ -1662,7 +2069,7 @@
                     // Simple rotation animation
                     anime({
                         targets: btn,
-                        rotate: '+=180',
+                        rotateZ: '+=180',
                         duration: 400,
                         easing: 'easeOutSine'
                     });
