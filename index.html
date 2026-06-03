@@ -711,11 +711,18 @@
         }
         [data-theme="white"] #combo-card { box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
         #close-combo-card {
-            position: absolute; top: 15px; right: 25px; border: none; background: transparent;
-            color: var(--primary); font-size: 45px; font-weight: 300; cursor: pointer; transition: 0.3s;
-            line-height: 1; padding: 0; margin: 0; z-index: 1000;
+            position: fixed; top: 20px; right: 25px; border: none; background: rgba(var(--primary-rgb), 0.15);
+            color: var(--primary); font-size: 32px; font-weight: 400; cursor: pointer; transition: 0.3s;
+            line-height: 1; padding: 0; margin: 0; z-index: 2000;
+            width: 50px; height: 50px; border-radius: 25px;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        #close-combo-card:hover { transform: scale(1.15); opacity: 0.7; }
+        [data-theme="white"] #close-combo-card {
+            background: rgba(0,0,0,0.05); color: #000;
+        }
+        #close-combo-card:hover { transform: scale(1.1); background: var(--primary); color: #fff; }
 
         .cc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .cc-logo { font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(var(--primary-rgb),0.6); }
@@ -742,13 +749,17 @@
         .cc-compat-value { position: absolute; right: 20px; top: 0; line-height: 40px; font-size: 20px; font-weight: 800; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
         [data-theme="white"] .cc-compat-value { color: #000; text-shadow: none; }
 
-        .cc-fps-section { margin-bottom: 50px; }
-        .cc-fps-columns { display: flex; justify-content: space-around; align-items: flex-end; height: 180px; }
-        .cc-fps-col { display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; width: 120px; }
-        .cc-fps-res { font-size: 18px; font-weight: 800; letter-spacing: 2px; opacity: 0.8; }
-        .cc-fps-bar-container { height: 140px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
-        .cc-fps-val { font-size: 34px; font-weight: 900; margin-bottom: 15px; font-family: 'Orbitron', sans-serif; }
-        .cc-fps-bar { width: 60px; height: 0%; border-radius: 8px 8px 0 0; }
+        .cc-fps-section { margin-bottom: 40px; }
+        .cc-fps-table-wrapper { width: 100%; max-width: 100%; margin: 0 auto; background: rgba(var(--primary-rgb), 0.03); border: 1px solid rgba(var(--primary-rgb), 0.15); border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+        .cc-fps-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .cc-fps-table th { padding: 15px; font-size: 14px; font-weight: 800; letter-spacing: 2px; color: var(--primary); border-bottom: 1px solid rgba(var(--primary-rgb), 0.15); }
+        .cc-fps-table td { padding: 15px; font-size: 20px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        [data-theme="white"] .cc-fps-table td { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .cc-fps-table tr:last-child td { border-bottom: none; }
+        .cc-fps-avg { font-size: 28px !important; font-family: 'Orbitron', sans-serif; font-weight: 900 !important; color: #fff; text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.4); }
+        [data-theme="white"] .cc-fps-avg { color: var(--primary); text-shadow: none; }
+        .cc-fps-reason { font-size: 15px; line-height: 1.5; color: rgba(255,255,255,0.7); text-align: center; font-style: italic; max-width: 90%; margin: 0 auto; }
+        [data-theme="white"] .cc-fps-reason { color: rgba(0,0,0,0.6); }
 
         .cc-footer { display: flex; gap: 40px; margin-top: auto; }
         .cc-footer-box { flex: 1; background: rgba(var(--primary-rgb), 0.05); border: 1px solid rgba(var(--primary-rgb), 0.2); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
@@ -1178,7 +1189,10 @@
                         <button class="bc-toggle-btn active" id="btn-part-cpu">I have a CPU</button>
                         <button class="bc-toggle-btn" id="btn-part-gpu">I have a GPU</button>
                     </div>
-                    <input type="text" id="bc-part-input" class="pi-search" placeholder="Search CPU... e.g. i9-14900K">
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="bc-part-input" class="pi-search" placeholder="Search CPU... e.g. i9-14900K" autocomplete="off" readonly>
+                        <div id="bc-part-suggestions" class="pi-suggestions"></div>
+                    </div>
                     <button id="bc-build-part-btn" class="pi-build-btn">Build Combo</button>
                 </div>
             </div>
@@ -1596,29 +1610,41 @@
                 </div>
                 
                 <div class="cc-fps-section">
-                    <div class="cc-section-label" style="text-align: center;">ESTIMATED FPS</div>
-                    <div class="cc-fps-columns">
-                        <div class="cc-fps-col">
-                            <div class="cc-fps-res">1080P</div>
-                            <div class="cc-fps-bar-container">
-                                <div class="cc-fps-val" id="cc-fps-1080">165</div>
-                                <div class="cc-fps-bar" id="cc-bar-1080" style="background:#1a7a1a;"></div>
-                            </div>
-                        </div>
-                        <div class="cc-fps-col">
-                            <div class="cc-fps-res">1440P</div>
-                            <div class="cc-fps-bar-container">
-                                <div class="cc-fps-val" id="cc-fps-1440">144</div>
-                                <div class="cc-fps-bar" id="cc-bar-1440" style="background:#1a7a1a;"></div>
-                            </div>
-                        </div>
-                        <div class="cc-fps-col">
-                            <div class="cc-fps-res">4K</div>
-                            <div class="cc-fps-bar-container">
-                                <div class="cc-fps-val" id="cc-fps-4k">89</div>
-                                <div class="cc-fps-bar" id="cc-bar-4k" style="background:#4caf50;"></div>
-                            </div>
-                        </div>
+                    <div class="cc-section-label" style="text-align: center;">ESTIMATED FPS (AAA HIGH / NO RT)</div>
+                    <div class="cc-fps-table-wrapper">
+                        <table class="cc-fps-table">
+                            <thead>
+                                <tr>
+                                    <th>RESOLUTION</th>
+                                    <th>1% LOWS</th>
+                                    <th>AVERAGE</th>
+                                    <th>1% HIGHS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 800;">1080P</td>
+                                    <td id="cc-fps-1080-low">--</td>
+                                    <td id="cc-fps-1080-avg" class="cc-fps-avg">--</td>
+                                    <td id="cc-fps-1080-high">--</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 800;">1440P</td>
+                                    <td id="cc-fps-1440-low">--</td>
+                                    <td id="cc-fps-1440-avg" class="cc-fps-avg">--</td>
+                                    <td id="cc-fps-1440-high">--</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 800;">4K</td>
+                                    <td id="cc-fps-4k-low">--</td>
+                                    <td id="cc-fps-4k-avg" class="cc-fps-avg">--</td>
+                                    <td id="cc-fps-4k-high">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="cc-fps-reason" id="cc-fps-reason">
+                        Analyzing performance metric bottlenecks...
                     </div>
                 </div>
                 
@@ -1640,6 +1666,14 @@
                 </div>
             </div>
         </div>
+        <button id="download-combo-btn" class="global-download-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Card
+        </button>
     </div>
     
     <script>
@@ -1751,6 +1785,8 @@
                     btn.addEventListener('click', () => {
                         togglePart.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
+                        partInput.value = '';
+                        document.getElementById('bc-part-suggestions').style.display = 'none';
                         if(btn.id === 'btn-part-cpu') {
                             partInput.placeholder = "Search CPU... e.g. i9-14900K";
                         } else {
@@ -1759,33 +1795,394 @@
                     });
                 });
 
+                // Best Combo Search Logic
+                const bcPartInput = document.getElementById('bc-part-input');
+                const bcPartSuggestions = document.getElementById('bc-part-suggestions');
+
+                const fuzzyMatch = (str, pattern) => {
+                    if (!pattern) return true;
+                    // very simple fuzzy
+                    pattern = pattern.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*?');
+                    return new RegExp(pattern, "i").test(str);
+                };
+
+                const getSelectedBcType = () => {
+                    return document.getElementById('btn-part-cpu').classList.contains('active') ? 'CPU' : 'GPU';
+                };
+
+                bcPartInput.addEventListener('input', () => {
+                    const type = getSelectedBcType();
+                    const query = bcPartInput.value.trim().toLowerCase();
+                    const availableComps = window.hardwareDatabase ? window.hardwareDatabase.filter(c => c.type === type) : [];
+
+                    if (!query) {
+                        renderBcSuggestions(availableComps);
+                        return;
+                    }
+
+                    // Smart search: first try includes, then fallback to fuzzy match
+                    let matches = availableComps.filter(c => c.name.toLowerCase().includes(query));
+                    if(matches.length === 0) {
+                         matches = availableComps.filter(c => fuzzyMatch(c.name, query));
+                    }
+
+                    if (matches.length > 0) {
+                        renderBcSuggestions(matches);
+                    } else {
+                        bcPartSuggestions.style.display = 'none';
+                    }
+                });
+
+                bcPartInput.addEventListener('click', (e) => {
+                    if (bcPartInput.readOnly) {
+                        bcPartInput.dispatchEvent(new Event('input'));
+                        setTimeout(() => { bcPartInput.readOnly = false; bcPartInput.focus(); }, 100);
+                    } else {
+                        bcPartInput.dispatchEvent(new Event('input'));
+                    }
+                });
+
+                bcPartInput.addEventListener('focus', () => {
+                    if (!bcPartInput.readOnly) bcPartInput.dispatchEvent(new Event('input'));
+                });
+
+                bcPartInput.addEventListener('blur', () => {
+                    setTimeout(() => { bcPartSuggestions.style.display = 'none'; bcPartInput.readOnly = true; }, 200);
+                });
+
+                function renderBcSuggestions(matches) {
+                    bcPartSuggestions.innerHTML = '';
+                    matches.forEach(m => {
+                        let div = document.createElement('div');
+                        div.className = 'pi-suggestion-item';
+                        div.textContent = m.name;
+                        div.addEventListener('click', () => {
+                            bcPartInput.value = m.name;
+                            bcPartSuggestions.style.display = 'none';
+                        });
+                        bcPartSuggestions.appendChild(div);
+                    });
+                    bcPartSuggestions.style.display = 'block';
+                }
+
                 // Result card functionality
                 const comboModal = document.getElementById('combo-card-modal');
                 const closeCombo = document.getElementById('close-combo-card');
                 
-                const buildCombo = () => {
+                const parsePrice = (str) => {
+                    if (!str || str === '--') return Infinity;
+                    let val = parseFloat(str.replace(/[^0-9.]/g, ''));
+                    return isNaN(val) ? Infinity : val;
+                };
+
+                const getCapabilities = (cpu, gpu) => {
+                    let gStr = gpu.name.toLowerCase();
+                    let cStr = cpu.name.toLowerCase();
+                    
+                    let gpuBase = 50; 
+                    let vram = 8;
+                    
+                    if (gStr.includes('4090')) { gpuBase = 220; vram = 24; }
+                    else if (gStr.includes('4080 super')) { gpuBase = 185; vram = 16; }
+                    else if (gStr.includes('4080')) { gpuBase = 180; vram = 16; }
+                    else if (gStr.includes('4070 ti super')) { gpuBase = 160; vram = 16; }
+                    else if (gStr.includes('4070 ti')) { gpuBase = 150; vram = 12; }
+                    else if (gStr.includes('4070 super')) { gpuBase = 140; vram = 12; }
+                    else if (gStr.includes('4070')) { gpuBase = 130; vram = 12; }
+                    else if (gStr.includes('4060 ti 16')) { gpuBase = 100; vram = 16; }
+                    else if (gStr.includes('4060 ti')) { gpuBase = 100; vram = 8; }
+                    else if (gStr.includes('4060')) { gpuBase = 80; vram = 8; }
+                    else if (gStr.includes('3090 ti')) { gpuBase = 165; vram = 24; }
+                    else if (gStr.includes('3090')) { gpuBase = 150; vram = 24; }
+                    else if (gStr.includes('3080 ti')) { gpuBase = 140; vram = 12; }
+                    else if (gStr.includes('3080 12gb')) { gpuBase = 135; vram = 12; }
+                    else if (gStr.includes('3080')) { gpuBase = 125; vram = 10; }
+                    else if (gStr.includes('3070 ti')) { gpuBase = 105; vram = 8; }
+                    else if (gStr.includes('3070')) { gpuBase = 95; vram = 8; }
+                    else if (gStr.includes('3060 ti')) { gpuBase = 85; vram = 8; }
+                    else if (gStr.includes('3060 12gb')) { gpuBase = 70; vram = 12; }
+                    else if (gStr.includes('3060')) { gpuBase = 65; vram = 8; }
+                    else if (gStr.includes('3050')) { gpuBase = 45; vram = 8; }
+                    else if (gStr.includes('2080 ti')) { gpuBase = 110; vram = 11; }
+                    else if (gStr.includes('2080')) { gpuBase = 85; vram = 8; }
+                    else if (gStr.includes('2070')) { gpuBase = 75; vram = 8; }
+                    else if (gStr.includes('2060')) { gpuBase = 60; vram = 6; }
+                    else if (gStr.includes('1080 ti')) { gpuBase = 75; vram = 11; }
+                    else if (gStr.includes('1080')) { gpuBase = 55; vram = 8; }
+                    else if (gStr.includes('1070')) { gpuBase = 45; vram = 8; }
+                    else if (gStr.includes('1060')) { gpuBase = 30; vram = 6; }
+                    else if (gStr.includes('1660')) { gpuBase = 40; vram = 6; }
+                    else if (gStr.includes('1650')) { gpuBase = 25; vram = 4; }
+                    else if (gStr.includes('7900 xtx')) { gpuBase = 200; vram = 24; }
+                    else if (gStr.includes('7900 xt')) { gpuBase = 175; vram = 20; }
+                    else if (gStr.includes('7900 gre')) { gpuBase = 150; vram = 16; }
+                    else if (gStr.includes('7800 xt')) { gpuBase = 135; vram = 16; }
+                    else if (gStr.includes('7700 xt')) { gpuBase = 115; vram = 12; }
+                    else if (gStr.includes('7600 xt')) { gpuBase = 85; vram = 16; }
+                    else if (gStr.includes('7600')) { gpuBase = 80; vram = 8; }
+                    else if (gStr.includes('6950 xt')) { gpuBase = 150; vram = 16; }
+                    else if (gStr.includes('6900 xt')) { gpuBase = 140; vram = 16; }
+                    else if (gStr.includes('6800 xt')) { gpuBase = 125; vram = 16; }
+                    else if (gStr.includes('6800')) { gpuBase = 110; vram = 16; }
+                    else if (gStr.includes('6750 xt')) { gpuBase = 95; vram = 12; }
+                    else if (gStr.includes('6700 xt')) { gpuBase = 90; vram = 12; }
+                    else if (gStr.includes('6700')) { gpuBase = 80; vram = 10; }
+                    else if (gStr.includes('6650 xt')) { gpuBase = 75; vram = 8; }
+                    else if (gStr.includes('6600 xt')) { gpuBase = 70; vram = 8; }
+                    else if (gStr.includes('6600')) { gpuBase = 60; vram = 8; }
+                    else if (gStr.includes('6500 xt')) { gpuBase = 35; vram = 4; }
+                    else if (gStr.includes('5700 xt')) { gpuBase = 75; vram = 8; }
+                    else if (gStr.includes('5700')) { gpuBase = 65; vram = 8; }
+                    else if (gStr.includes('5600 xt')) { gpuBase = 55; vram = 6; }
+                    else if (gStr.includes('rx 590')) { gpuBase = 35; vram = 8; }
+                    else if (gStr.includes('rx 580')) { gpuBase = 30; vram = 8; }
+                    else if (gStr.includes('rx 570')) { gpuBase = 25; vram = 4; }
+                    else if (gStr.includes('a770')) { gpuBase = 80; vram = 16; }
+                    else if (gStr.includes('a750')) { gpuBase = 70; vram = 8; }
+                    
+                    if (gpuBase === 50) {
+                        gpuBase = 30; // Fallback for really old unlisted GPUs so they don't break logic
+                    }
+                    
+                    let cpuBase = 80;
+                    if (cStr.includes('x3d')) cpuBase = 220;
+                    else if (cStr.match(/9950x|14900|285k/)) cpuBase = 200;
+                    else if (cStr.match(/7950x|13900|14700|265k/)) cpuBase = 190;
+                    else if (cStr.match(/13700|7900x|9700x|9900x/)) cpuBase = 180;
+                    else if (cStr.match(/12900|14600|7700x|13600|245k/)) cpuBase = 170;
+                    else if (cStr.match(/12700|7600x|9600x|5950x/)) cpuBase = 160;
+                    else if (cStr.match(/5900x|12600|13500/)) cpuBase = 150;
+                    else if (cStr.match(/5800x|13400|11900|14400/)) cpuBase = 140;
+                    else if (cStr.match(/5700x|12400|5600x|11700/)) cpuBase = 130;
+                    else if (cStr.match(/5600g|5500|10900|11600/)) cpuBase = 120;
+                    else if (cStr.match(/10700|10600|3900x|11400/)) cpuBase = 110;
+                    else if (cStr.match(/3700x|10400|3600|9900k/)) cpuBase = 100;
+                    else if (cStr.match(/9700k|8700k/)) cpuBase = 90;
+                    
+                    if (cpuBase === 80) {
+                        cpuBase = 60; // Fallback for older unknown CPUs
+                    }
+                    
+                    return { gpuBase, vram, cpuBase };
+                };
+
+                const updateComboUI = (cpu, gpu) => {
+                    document.getElementById('cc-cpu-name').innerText = cpu.name;
+                    document.getElementById('cc-cpu-rating').innerText = cpu.rating || 'N/A';
+                    
+                    document.getElementById('cc-gpu-name').innerText = gpu.name;
+                    document.getElementById('cc-gpu-rating').innerText = gpu.rating || 'N/A';
+                    
+                    let cpuP = parsePrice(cpu.price);
+                    let gpuP = parsePrice(gpu.price);
+                    let total = (cpuP === Infinity || gpuP === Infinity) ? 'N/A' : (cpuP + gpuP);
+                    let formatChar = document.getElementById('btn-curr-eur').classList.contains('active') ? '€' : '$';
+                    
+                    document.getElementById('cc-price').innerText = total === 'N/A' ? 'N/A' : `${formatChar}${total.toLocaleString()}`;
+                    
+                    let cRating = parseFloat(cpu.rating||8);
+                    let bRating = parseFloat(gpu.rating || '8');
+                    let diff = Math.abs(cRating - bRating);
+                    let compat = 100 - (diff * 15);
+                    if(compat > 99) compat = 99;
+                    if(compat < 60) compat = 60;
+                    document.getElementById('cc-compat-val').innerText = `${Math.round(compat)}%`;
+
+                    let { gpuBase, vram, cpuBase } = getCapabilities(cpu, gpu);
+
+                    let vramScore1080 = Math.min(1.0, vram / 8);
+                    let vramScore1440 = Math.min(1.0, vram / 12);
+                    let vramScore4k = Math.min(1.0, vram / 16);
+
+                    let vPen1080 = vram < 8 ? (8 - vram) * 0.05 : 0;
+                    let vPen1440 = vram < 10 ? (10 - vram) * 0.08 : 0;
+                    let vPen4k   = vram < 16 ? (16 - vram) * 0.08 : 0;
+
+                    let gScore1080 = gpuBase; 
+                    let gScore1440 = gpuBase * 0.70;
+                    let gScore4k   = gpuBase * 0.40;
+
+                    let fps1080 = (cpuBase * 0.40) + (gScore1080 * 0.50) + (gScore1080 * vramScore1080 * 0.10);
+                    let fps1440 = (cpuBase * 0.25) + (gScore1440 * 0.65) + (gScore1440 * vramScore1440 * 0.10);
+                    let fps4k   = (cpuBase * 0.10) + (gScore4k * 0.80) + (gScore4k * vramScore4k * 0.10);
+
+                    // True bottleneck is max CPU can push vs max GPU can push.
+                    fps1080 = Math.min(cpuBase * 1.0, fps1080);
+                    fps1440 = Math.min(cpuBase * 1.5, fps1440);
+                    fps4k = Math.min(cpuBase * 2.5, fps4k); 
+                    
+                    if (cpuBase > gpuBase * 1.5 && gpuBase < 80) fps1080 = gpuBase * 1.5;
+
+                    fps1080 = Math.max(10, Math.round(fps1080 * (1 - vPen1080)));
+                    fps1440 = Math.max(5, Math.round(fps1440 * (1 - vPen1440)));
+                    fps4k   = Math.round(fps4k * (1 - vPen4k));
+
+                    if (gpuBase < 90) fps4k = Math.max(0, fps4k - 10);
+                    if (vram < 8) fps4k = Math.max(0, Math.floor(fps4k * 0.5));
+                    if (vram < 12) fps4k = Math.max(0, Math.floor(fps4k * 0.8));
+
+                    document.getElementById('cc-fps-1080-avg').innerText = fps1080;
+                    document.getElementById('cc-fps-1080-low').innerText = Math.round(fps1080 * 0.8);
+                    document.getElementById('cc-fps-1080-high').innerText = Math.round(fps1080 * 1.15);
+                    
+                    document.getElementById('cc-fps-1440-avg').innerText = fps1440;
+                    document.getElementById('cc-fps-1440-low').innerText = Math.round(fps1440 * 0.78);
+                    document.getElementById('cc-fps-1440-high').innerText = Math.round(fps1440 * 1.12);
+                    
+                    document.getElementById('cc-fps-4k-avg').innerText = fps4k;
+                    document.getElementById('cc-fps-4k-low').innerText = Math.round(fps4k * 0.75);
+                    document.getElementById('cc-fps-4k-high').innerText = Math.round(fps4k * 1.10);
+                    
+                    let reason = "";
+                    if (cpuBase < gpuBase - 60) reason = `The ${cpu.name} significantly bottlenecks the powerful ${gpu.name}, especially at 1080p. Performance at 4K is mainly GPU-dependent.`;
+                    else if (gpuBase < cpuBase - 80) reason = `The ${gpu.name} limits the high-end ${cpu.name}. The CPU is under-utilized here.`;
+                    else if (vram < 12 && gpuBase >= 100) reason = `Great balance, but the ${vram}GB VRAM on the ${gpu.name} might restrict modern AAA games at 1440p High or 4K.`;
+                    else if (vram < 8) reason = `The ${vram}GB VRAM prevents stable 1440p/4K gaming in modern AAA titles. 1080p is recommended.`;
+                    else if (gpuBase >= 180 && cpuBase >= 180) reason = `Enthusiast tier parts. Exceptional performance rendering smooth framerates even at 4K Ultra via native rendering.`;
+                    else reason = `Balanced match. The system will deliver consistent frame rates across most games depending on the resolution.`;
+                    
+                    document.getElementById('cc-fps-reason').innerText = reason;
+
+                    const bText = document.getElementById('cc-best-text');
+                    if (fps4k >= 60) bText.innerText = '4K Gaming';
+                    else if (fps1440 >= 60) bText.innerText = '1440P Gaming';
+                    else bText.innerText = '1080P Gaming';
+
                     comboModal.style.display = 'block';
-                    
-                    // Reset animation states
-                    document.getElementById('cc-compat-fill').style.width = '0%';
-                    document.getElementById('cc-bar-1080').style.height = '0%';
-                    document.getElementById('cc-bar-1440').style.height = '0%';
-                    document.getElementById('cc-bar-4k').style.height = '0%';
-                    
                     anime({ targets: comboModal, opacity: [0, 1], duration: 300, easing: 'linear' });
                     anime({ targets: '#combo-card-scaler', scale: [0.9, window.innerWidth < 1100 ? (window.innerWidth / 1120) * 0.9 : 1], duration: 600, easing: 'easeOutElastic(1, .8)' });
                     
-                    // Animate bars
+                    document.getElementById('cc-compat-fill').style.width = '0%';
+                    
                     setTimeout(() => {
-                        anime({ targets: '#cc-compat-fill', width: '94%', duration: 1200, easing: 'easeOutQuart' });
-                        anime({ targets: '#cc-bar-1080', height: '100%', duration: 1000, easing: 'easeOutElastic(1, 1)' });
-                        anime({ targets: '#cc-bar-1440', height: '87%', duration: 1000, delay: 100, easing: 'easeOutElastic(1, 1)' });
-                        anime({ targets: '#cc-bar-4k', height: '54%', duration: 1000, delay: 200, easing: 'easeOutElastic(1, 1)' });
+                        anime({ targets: '#cc-compat-fill', width: `${Math.round(compat)}%`, duration: 1200, easing: 'easeOutQuart' });
                     }, 400);
                 };
 
-                document.getElementById('bc-build-budget-btn').addEventListener('click', buildCombo);
-                document.getElementById('bc-build-part-btn').addEventListener('click', buildCombo);
+                document.getElementById('bc-build-budget-btn').addEventListener('click', () => {
+                    const bInput = document.getElementById('bc-budget-input').value;
+                    let userBudget = parseFloat(bInput);
+                    if (!userBudget || isNaN(userBudget)) return;
+                    
+                    // Simple budget conversion if EUR
+                    if(document.getElementById('btn-curr-eur').classList.contains('active')) {
+                        userBudget = userBudget * 1.08; // roughly convert to USD for matching DB
+                    }
+                    
+                    const cpus = window.hardwareDatabase.filter(c => c.type === 'CPU' && parsePrice(c.price) !== Infinity);
+                    const gpus = window.hardwareDatabase.filter(c => c.type === 'GPU' && parsePrice(c.price) !== Infinity);
+                    
+                    // Target Combo budget directly
+                    let comboBudget = userBudget;
+                    
+                    let bestPair = null;
+                    let bestScore = -Infinity;
+
+                    for(let cpu of cpus) {
+                        for(let gpu of gpus) {
+                            let price = parsePrice(cpu.price) + parsePrice(gpu.price);
+                            if(price <= comboBudget) {
+                                let score = parseFloat(cpu.rating) + parseFloat(gpu.rating);
+                                
+                                // Reward being close to the maximum budget
+                                let priceRatio = price / comboBudget;
+                                score += priceRatio * 20;
+                                
+                                let { gpuBase, cpuBase } = getCapabilities(cpu, gpu);
+                                
+                                // Penalize huge gap in capabilities
+                                let bottleneck = Math.abs(gpuBase - cpuBase);
+                                score -= bottleneck * 0.2;
+                                
+                                // Ensure standard gaming PC balance: GPU should usually be more expensive than CPU
+                                let cPrice = parsePrice(cpu.price) || 1;
+                                let gPrice = parsePrice(gpu.price) || 1;
+                                let ratio = gPrice / cPrice;
+                                
+                                if (ratio < 1.0) {
+                                    score -= 30; // heavy penalty if CPU more expensive than GPU
+                                } else if (ratio < 1.3) {
+                                    score -= 5;
+                                } else if (ratio > 4.5) {
+                                    score -= 10; // CPU is maybe too cheap to handle the setup
+                                } else {
+                                    score += 2; // Optimal gaming ratio range
+                                }
+                                
+                                if(score > bestScore) {
+                                    bestScore = score;
+                                    bestPair = { cpu, gpu };
+                                }
+                            }
+                        }
+                    }
+                    
+                    if(bestPair) {
+                        updateComboUI(bestPair.cpu, bestPair.gpu);
+                    } else {
+                        alert("Budget too low, couldn't find a combo!");
+                    }
+                });
+
+                document.getElementById('bc-build-part-btn').addEventListener('click', () => {
+                    const query = bcPartInput.value.trim().toLowerCase();
+                    if(!query) return;
+                    
+                    const type = getSelectedBcType();
+                    const availableComps = window.hardwareDatabase ? window.hardwareDatabase.filter(c => c.type === type) : [];
+                    
+                    let match = availableComps.find(c => c.name.toLowerCase() === query);
+                    if(!match) {
+                        let matches = availableComps.filter(c => c.name.toLowerCase().includes(query) || fuzzyMatch(c.name, query));
+                        match = matches[0];
+                    }
+                    
+                    if(!match) return;
+
+                    const oppositeType = type === 'CPU' ? 'GPU' : 'CPU';
+                    const oppositeComps = window.hardwareDatabase.filter(c => c.type === oppositeType);
+                    
+                    let rating = parseFloat(match.rating || '8');
+                    let price = parsePrice(match.price);
+                    
+                    let bestPairComp = null;
+                    let bestScore = -Infinity;
+
+                    for(let p of oppositeComps) {
+                        let score = parseFloat(p.rating || '8');
+                        let cpu = type === 'CPU' ? match : p;
+                        let gpu = type === 'GPU' ? match : p;
+                        
+                        let { gpuBase, cpuBase } = getCapabilities(cpu, gpu);
+                        
+                        let bottleneck = Math.abs(gpuBase - cpuBase);
+                        score -= bottleneck * 0.5;
+                        
+                        let cPrice = parsePrice(cpu.price) || 1;
+                        let gPrice = parsePrice(gpu.price) || 1;
+                        if (cPrice === Infinity || gPrice === Infinity) continue;
+                        
+                        let ratio = gPrice / cPrice;
+                        
+                        if (ratio < 1.0) {
+                            score -= 20; 
+                        } else if (ratio < 1.3) {
+                            score -= 5;
+                        } else if (ratio > 4.5) {
+                            score -= 15;
+                        }
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestPairComp = p;
+                        }
+                    }
+                    
+                    if(bestPairComp) {
+                        if(type === 'CPU') updateComboUI(match, bestPairComp);
+                        else updateComboUI(bestPairComp, match);
+                    }
+                });
                 
                 closeCombo.addEventListener('click', () => {
                     anime({ targets: comboModal, opacity: [1, 0], duration: 300, easing: 'linear', complete: () => { comboModal.style.display = 'none'; } });
@@ -1987,9 +2384,9 @@
                 });
             });
 
-            document.getElementById('download-card-btn').addEventListener('click', async () => {
-                const card = document.getElementById('tech-card');
-                const btn = document.getElementById('download-card-btn');
+            const handleCardDownload = async (cardId, btnId, fileNamePrefix, fileNameElId) => {
+                const card = document.getElementById(cardId);
+                const btn = document.getElementById(btnId);
                 const originalText = btn.innerHTML;
                 
                 try {
@@ -2035,8 +2432,11 @@
                     const dataUrl = cvs.toDataURL('image/png');
                     
                     const link = document.createElement('a');
-                    const name = document.getElementById('tc-comp-name').textContent.replace(/\s+/g,'_');
-                    link.download = `ManoTake-${name}.png`;
+                    let name = 'Card';
+                    if (fileNameElId && document.getElementById(fileNameElId)) {
+                        name = document.getElementById(fileNameElId).textContent.replace(/\s+/g,'_');
+                    }
+                    link.download = `ManoTake-${fileNamePrefix}-${name}.png`;
                     link.href = dataUrl;
                     link.click();
                 } catch(e) { 
@@ -2045,6 +2445,14 @@
                 } finally {
                     btn.innerHTML = originalText;
                 }
+            };
+
+            document.getElementById('download-card-btn').addEventListener('click', () => {
+                handleCardDownload('tech-card', 'download-card-btn', 'Part', 'tc-comp-name');
+            });
+            
+            document.getElementById('download-combo-btn').addEventListener('click', () => {
+                handleCardDownload('combo-card', 'download-combo-btn', 'Combo', 'cc-best-text');
             });
 
             // Theme Management
